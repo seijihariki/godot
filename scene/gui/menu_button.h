@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -29,14 +29,14 @@
 #ifndef MENU_BUTTON_H
 #define MENU_BUTTON_H
 
-#include "scene/gui/popup_menu.h"
 #include "scene/gui/button.h"
+#include "scene/gui/popup_menu.h"
 /**
 	@author Juan Linietsky <reduzio@gmail.com>
 */
 class MenuButton : public Button {
 
-	OBJ_TYPE( MenuButton, Button );
+	GDCLASS(MenuButton, Button);
 
 	bool clicked;
 	PopupMenu *popup;
@@ -44,15 +44,14 @@ class MenuButton : public Button {
 
 	void _unhandled_key_input(InputEvent p_event);
 	Array _get_items() const;
-	void _set_items(const Array& p_items);
+	void _set_items(const Array &p_items);
 
-	void _input_event(InputEvent p_event);
+	void _gui_input(InputEvent p_event);
+
 protected:
-
-
 	static void _bind_methods();
-public:
 
+public:
 	PopupMenu *get_popup();
 	MenuButton();
 	~MenuButton();

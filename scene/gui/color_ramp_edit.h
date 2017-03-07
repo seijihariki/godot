@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -29,8 +29,8 @@
 #ifndef SCENE_GUI_COLOR_RAMP_EDIT_H_
 #define SCENE_GUI_COLOR_RAMP_EDIT_H_
 
-#include "scene/gui/popup.h"
 #include "scene/gui/color_picker.h"
+#include "scene/gui/popup.h"
 #include "scene/resources/color_ramp.h"
 #include "scene/resources/default_theme/theme_data.h"
 
@@ -38,7 +38,7 @@
 
 class ColorRampEdit : public Control {
 
-	OBJ_TYPE(ColorRampEdit,Control);
+	GDCLASS(ColorRampEdit, Control);
 
 	PopupPanel *popup;
 	ColorPicker *picker;
@@ -50,21 +50,21 @@ class ColorRampEdit : public Control {
 	Vector<ColorRamp::Point> points;
 
 	void _draw_checker(int x, int y, int w, int h);
-	void _color_changed(const Color& p_color);
+	void _color_changed(const Color &p_color);
 	int _get_point_from_pos(int x);
 	void _show_color_picker();
 
 protected:
-	void _input_event(const InputEvent& p_event);
+	void _gui_input(const InputEvent &p_event);
 	void _notification(int p_what);
 	static void _bind_methods();
 
 public:
-	void set_ramp(const Vector<float>& p_offsets,const Vector<Color>& p_colors);
+	void set_ramp(const Vector<float> &p_offsets, const Vector<Color> &p_colors);
 	Vector<float> get_offsets() const;
 	Vector<Color> get_colors() const;
-	void set_points(Vector<ColorRamp::Point>& p_points);
-	Vector<ColorRamp::Point>& get_points();
+	void set_points(Vector<ColorRamp::Point> &p_points);
+	Vector<ColorRamp::Point> &get_points();
 	virtual Size2 get_minimum_size() const;
 
 	ColorRampEdit();
@@ -73,8 +73,7 @@ public:
 
 /*class  ColorRampEditPanel : public Panel
 {
-	OBJ_TYPE(ColorRampEditPanel, Panel );
+	GDCLASS(ColorRampEditPanel, Panel );
 };*/
-
 
 #endif /* SCENE_GUI_COLOR_RAMP_EDIT_H_ */

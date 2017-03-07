@@ -8,6 +8,7 @@ platform/osx/logo.h
 platform/windows/logo.h
 platform/x11/logo.h
 drivers/gles2/shaders/*.h
+drivers/gles3/shaders/*.h
 modules/register_module_types.cpp
 core/version.h
 core/method_bind.inc
@@ -15,12 +16,12 @@ core/method_bind_ext.inc
 core/script_encryption_key.cpp
 core/global_defaults.cpp
 drivers/unix/os_unix_global_settings_path.cpp
-tools/editor/register_exporters.cpp
-tools/editor/doc_data_compressed.h
-tools/editor/certs_compressed.h
-tools/editor/editor_icons.cpp
-tools/editor/translations.h
-tools/editor/builtin_fonts.h
+editor/register_exporters.cpp
+editor/doc_data_compressed.h
+editor/certs_compressed.h
+editor/editor_icons.cpp
+editor/translations.h
+editor/builtin_fonts.h
 .fscache
 make.bat
 log.txt
@@ -143,7 +144,9 @@ ipch/
 *.sdf
 *.cachefile
 *.VC.db
+*.VC.opendb
 *.VC.VC.opendb
+enc_temp_folder/
 
 # Visual Studio profiler
 *.psess
@@ -242,6 +245,9 @@ node_modules/
 
 #Kdevelop project files
 *.kdev4
+
+# xCode
+xcuserdata
 
 # RIA/Silverlight projects
 Generated_Code/

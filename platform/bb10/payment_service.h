@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -39,31 +39,25 @@
 
 class PaymentService : public Object {
 
-	OBJ_TYPE(PaymentService, Object);
+	GDCLASS(PaymentService, Object);
 
 	static void _bind_methods();
 
 	List<Variant> pending_events;
 
 public:
-
 	Error request_product_info(Variant p_params);
 	Error purchase(Variant p_params);
 
 	int get_pending_event_count();
 	Variant pop_pending_event();
 
-	bool handle_event(bps_event_t* p_event);
+	bool handle_event(bps_event_t *p_event);
 
 	PaymentService();
 	~PaymentService();
 };
 
-
-
 #endif
 
-
 #endif
-
-

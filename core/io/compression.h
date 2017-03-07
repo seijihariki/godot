@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -31,23 +31,18 @@
 
 #include "typedefs.h"
 
-class Compression
-{
+class Compression {
 public:
-
 	enum Mode {
 		MODE_FASTLZ,
 		MODE_DEFLATE
 	};
 
-
-	static int compress(uint8_t *p_dst, const uint8_t *p_src, int p_src_size,Mode p_mode=MODE_FASTLZ);
-	static int get_max_compressed_buffer_size(int p_src_size,Mode p_mode=MODE_FASTLZ);
-	static int decompress(uint8_t *p_dst, int p_dst_max_size, const uint8_t *p_src, int p_src_size,Mode p_mode=MODE_FASTLZ);
+	static int compress(uint8_t *p_dst, const uint8_t *p_src, int p_src_size, Mode p_mode = MODE_FASTLZ);
+	static int get_max_compressed_buffer_size(int p_src_size, Mode p_mode = MODE_FASTLZ);
+	static int decompress(uint8_t *p_dst, int p_dst_max_size, const uint8_t *p_src, int p_src_size, Mode p_mode = MODE_FASTLZ);
 
 	Compression();
 };
-
-
 
 #endif // COMPRESSION_H

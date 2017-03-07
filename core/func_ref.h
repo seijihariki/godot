@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -31,20 +31,19 @@
 
 #include "reference.h"
 
-class FuncRef : public Reference{
+class FuncRef : public Reference {
 
-	OBJ_TYPE(FuncRef,Reference);
+	GDCLASS(FuncRef, Reference);
 	ObjectID id;
 	StringName function;
 
 protected:
-
 	static void _bind_methods();
-public:
 
-	Variant call_func(const Variant** p_args, int p_argcount, Variant::CallError& r_error);
+public:
+	Variant call_func(const Variant **p_args, int p_argcount, Variant::CallError &r_error);
 	void set_instance(Object *p_obj);
-	void set_function(const StringName& p_func);
+	void set_function(const StringName &p_func);
 	FuncRef();
 };
 

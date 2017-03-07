@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -29,16 +29,14 @@
 #include "semaphore.h"
 #include "error_macros.h"
 
-Semaphore* (*Semaphore::create_func)()=0;
+Semaphore *(*Semaphore::create_func)() = 0;
 
 Semaphore *Semaphore::create() {
 
-	ERR_FAIL_COND_V( !create_func, 0 );
+	ERR_FAIL_COND_V(!create_func, 0);
 
 	return create_func();
 }
 
-
 Semaphore::~Semaphore() {
-
 }

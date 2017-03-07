@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -29,21 +29,19 @@
 #ifndef SPACE_2D_H
 #define SPACE_2D_H
 
-#include "servers/physics_2d_server.h"
 #include "resource.h"
-
+#include "servers/physics_2d_server.h"
 
 class Space2D : public Resource {
 
-	OBJ_TYPE(Space2D,Resource);
+	GDCLASS(Space2D, Resource);
 	bool active;
 	RID space;
+
 protected:
-
 	static void _bind_methods();
+
 public:
-
-
 	void set_active(bool p_active);
 	bool is_active() const;
 

@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -29,27 +29,22 @@
 #ifndef CHECK_BOX_H
 #define CHECK_BOX_H
 
-
 #include "scene/gui/button.h"
 /**
 @author Mariano Suligoy <marianognu.esyrpg@gmail.com>
 */
 class CheckBox : public Button {
 
-    OBJ_TYPE( CheckBox, Button );
-
+	GDCLASS(CheckBox, Button);
 
 protected:
-    void _notification(int p_what);
+	void _notification(int p_what);
 
-    bool is_radio();
-
+	bool is_radio();
 
 public:
-
-    CheckBox(const String& p_text=String());
-    ~CheckBox();
-
+	CheckBox(const String &p_text = String());
+	~CheckBox();
 };
 
 #endif

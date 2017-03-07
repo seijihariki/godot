@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -29,12 +29,11 @@
 #ifndef CHARACTER_CAMERA_H
 #define CHARACTER_CAMERA_H
 
-
 #include "scene/3d/camera.h"
 #if 0
 class CharacterCamera : public Camera {
 
-	OBJ_TYPE( CharacterCamera, Camera );
+	GDCLASS( CharacterCamera, Camera );
 public:
 
 	enum CameraType {

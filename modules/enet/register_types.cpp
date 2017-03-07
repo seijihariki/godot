@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -30,22 +30,21 @@
 #include "error_macros.h"
 #include "networked_multiplayer_enet.h"
 
-static bool enet_ok=false;
+static bool enet_ok = false;
 
 void register_enet_types() {
 
-	if (enet_initialize() !=0 ) {
+	if (enet_initialize() != 0) {
 		ERR_PRINT("ENet initialization failure");
 	} else {
-		enet_ok=true;
+		enet_ok = true;
 	}
 
-	ObjectTypeDB::register_type<NetworkedMultiplayerENet>();
+	ClassDB::register_class<NetworkedMultiplayerENet>();
 }
 
 void unregister_enet_types() {
 
 	if (enet_ok)
 		enet_deinitialize();
-
 }

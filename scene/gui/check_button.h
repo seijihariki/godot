@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -29,24 +29,20 @@
 #ifndef CHECK_BUTTON_H
 #define CHECK_BUTTON_H
 
-
 #include "scene/gui/button.h"
 /**
 @author Juan Linietsky <reduzio@gmail.com>
 */
 class CheckButton : public Button {
 
-	OBJ_TYPE( CheckButton, Button );
-
+	GDCLASS(CheckButton, Button);
 
 protected:
 	void _notification(int p_what);
 
 public:
-
 	CheckButton();
 	~CheckButton();
-
 };
 
 #endif

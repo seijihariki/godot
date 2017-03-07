@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -29,9 +29,8 @@
 #ifndef KEY_MAPPING_HAIKU_H
 #define KEY_MAPPING_HAIKU_H
 
-class KeyMappingHaiku
-{
-	KeyMappingHaiku() {};
+class KeyMappingHaiku {
+	KeyMappingHaiku(){};
 
 public:
 	static unsigned int get_keysym(int32 raw_char, int32 key);

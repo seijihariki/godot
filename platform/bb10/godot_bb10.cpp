@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -31,12 +31,12 @@
 
 #include <unistd.h>
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
 
 	OSBB10 os;
 
-	Error err  = Main::setup(argv[0],argc-1,&argv[1]);
-	if (err!=OK)
+	Error err = Main::setup(argv[0], argc - 1, &argv[1]);
+	if (err != OK)
 		return 255;
 
 	if (Main::start())
@@ -45,4 +45,3 @@ int main(int argc, char* argv[]) {
 
 	return os.get_exit_code();
 }
-

@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -33,16 +33,14 @@
 
 class iOS : public Object {
 
-	OBJ_TYPE(iOS, Object);
+	GDCLASS(iOS, Object);
 
 	static void _bind_methods();
 
 public:
-
 	String get_rate_url(int p_app_id) const;
 
 	iOS();
-
 };
 
 #endif

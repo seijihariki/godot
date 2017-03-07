@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -32,7 +32,6 @@
 #ifdef OPENGL_ENABLED
 #include <windows.h>
 
-
-PROC get_gl_proc_address(const char* p_address);
+PROC get_gl_proc_address(const char *p_address);
 #endif
 #endif // CTXGL_PROCADDR_H

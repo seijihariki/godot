@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -34,23 +34,23 @@ Error AudioDriverBB10::init() {
 	return init(NULL);
 };
 
-Error AudioDriverBB10::init(const char* p_name) {
+Error AudioDriverBB10::init(const char *p_name) {
 
-	active=false;
-	thread_exited=false;
-	exit_thread=false;
+	active = false;
+	thread_exited = false;
+	exit_thread = false;
 	pcm_open = false;
 	samples_in = NULL;
 	samples_out = NULL;
 
 	mix_rate = 44100;
-	output_format = OUTPUT_STEREO;
+	speaker_mode = SPEAKER_MODE_STEREO;
 
-	char* dev_name;
+	char *dev_name;
 	if (p_name == NULL) {
 		dev_name = "pcmPreferred";
 	} else {
-		dev_name = (char *) p_name;
+		dev_name = (char *)p_name;
 	}
 	printf("******** reconnecting to device %s\n", dev_name);
 	int ret = snd_pcm_open_name(&pcm_handle, dev_name, SND_PCM_OPEN_PLAYBACK);
@@ -58,7 +58,7 @@ Error AudioDriverBB10::init(const char* p_name) {
 	pcm_open = true;
 
 	snd_pcm_channel_info_t cinfo;
-	zeromem(&cinfo, sizeof (cinfo));
+	zeromem(&cinfo, sizeof(cinfo));
 	cinfo.channel = SND_PCM_CHANNEL_PLAYBACK;
 	snd_pcm_plugin_info(pcm_handle, &cinfo);
 
@@ -70,7 +70,7 @@ Error AudioDriverBB10::init(const char* p_name) {
 	ERR_FAIL_COND_V(!(cinfo.formats & SND_PCM_FMT_S16_LE), FAILED);
 
 	printf("voices %i\n", cinfo.max_voices);
-	output_format = cinfo.max_voices >= 2 ? OUTPUT_STEREO : OUTPUT_MONO;
+	speaker_mode = SPEAKER_MODE_STEREO;
 
 	snd_pcm_channel_params_t cp;
 	zeromem(&cp, sizeof(cp));
@@ -84,7 +84,7 @@ Error AudioDriverBB10::init(const char* p_name) {
 	cp.buf.block.frags_min = 1;
 	cp.format.interleave = 1;
 	cp.format.rate = mix_rate;
-	cp.format.voices = output_format == OUTPUT_MONO ? 1 : 2;
+	cp.format.voices = speaker_mode;
 	cp.format.format = SND_PCM_SFMT_S16_LE;
 
 	ret = snd_pcm_plugin_params(pcm_handle, &cp);
@@ -117,20 +117,19 @@ Error AudioDriverBB10::init(const char* p_name) {
 	return OK;
 };
 
-void AudioDriverBB10::thread_func(void* p_udata) {
+void AudioDriverBB10::thread_func(void *p_udata) {
 
-	AudioDriverBB10* ad = (AudioDriverBB10*)p_udata;
+	AudioDriverBB10 *ad = (AudioDriverBB10 *)p_udata;
 
-	int channels = (ad->output_format == OUTPUT_MONO ? 1 : 2);
+	int channels = speaker_mode;
 	int frame_count = ad->sample_buf_count / channels;
 	int bytes_out = frame_count * channels * 2;
 
 	while (!ad->exit_thread) {
 
-
 		if (!ad->active) {
 
-			for (int i=0; i < ad->sample_buf_count; i++) {
+			for (int i = 0; i < ad->sample_buf_count; i++) {
 
 				ad->samples_out[i] = 0;
 			};
@@ -142,20 +141,19 @@ void AudioDriverBB10::thread_func(void* p_udata) {
 
 			ad->unlock();
 
-			for(int i=0;i<frame_count*channels;i++) {
+			for (int i = 0; i < frame_count * channels; i++) {
 
-				ad->samples_out[i]=ad->samples_in[i]>>16;
+				ad->samples_out[i] = ad->samples_in[i] >> 16;
 			}
 		};
-
 
 		int todo = bytes_out;
 		int total = 0;
 
 		while (todo) {
 
-			uint8_t* src = (uint8_t*)ad->samples_out;
-			int wrote = snd_pcm_plugin_write(ad->pcm_handle, (void*)(src + total), todo);
+			uint8_t *src = (uint8_t *)ad->samples_out;
+			int wrote = snd_pcm_plugin_write(ad->pcm_handle, (void *)(src + total), todo);
 			if (wrote < 0) {
 				// error?
 				break;
@@ -179,7 +177,7 @@ void AudioDriverBB10::thread_func(void* p_udata) {
 					break;
 				};
 				if (status.status == SND_PCM_STATUS_READY ||
-					status.status == SND_PCM_STATUS_UNDERRUN) {
+						status.status == SND_PCM_STATUS_UNDERRUN) {
 					snd_pcm_plugin_prepare(ad->pcm_handle, SND_PCM_CHANNEL_PLAYBACK);
 				} else {
 					break;
@@ -188,9 +186,9 @@ void AudioDriverBB10::thread_func(void* p_udata) {
 		};
 	};
 
-	snd_pcm_plugin_flush (ad->pcm_handle, SND_PCM_CHANNEL_PLAYBACK);
+	snd_pcm_plugin_flush(ad->pcm_handle, SND_PCM_CHANNEL_PLAYBACK);
 
-	ad->thread_exited=true;
+	ad->thread_exited = true;
 	printf("**************** audio thread exit\n");
 };
 
@@ -204,16 +202,18 @@ int AudioDriverBB10::get_mix_rate() const {
 	return mix_rate;
 };
 
-AudioDriverSW::OutputFormat AudioDriverBB10::get_output_format() const {
+AudioDriver::SpeakerMode AudioDriverBB10::get_speaker_mode() const {
 
-	return output_format;
+	return speaker_mode;
 };
+
 void AudioDriverBB10::lock() {
 
 	if (!thread)
 		return;
 	mutex->lock();
 };
+
 void AudioDriverBB10::unlock() {
 
 	if (!thread)
@@ -251,4 +251,3 @@ AudioDriverBB10::~AudioDriverBB10() {
 	memdelete(mutex);
 	mutex = NULL;
 };
-

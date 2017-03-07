@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -26,12 +26,11 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
-#include "main/main.h"
 #include "haiku_gl_view.h"
+#include "main/main.h"
 
 HaikuGLView::HaikuGLView(BRect frame, uint32 type)
-   : BGLView(frame, "GodotGLView", B_FOLLOW_ALL_SIDES, 0, type)
-{
+	: BGLView(frame, "GodotGLView", B_FOLLOW_ALL_SIDES, 0, type) {
 }
 
 void HaikuGLView::AttachedToWindow(void) {

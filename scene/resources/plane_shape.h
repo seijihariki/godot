@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -33,17 +33,16 @@
 
 class PlaneShape : public Shape {
 
-	OBJ_TYPE(PlaneShape,Shape);
+	GDCLASS(PlaneShape, Shape);
 	Plane plane;
 
 protected:
-
 	static void _bind_methods();
 	virtual void _update_shape();
 
 	virtual Vector<Vector3> _gen_debug_mesh_lines();
-public:
 
+public:
 	void set_plane(Plane p_plane);
 	Plane get_plane() const;
 

@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -31,29 +31,26 @@
 
 #if defined(UNIX_ENABLED) || defined(PTHREAD_ENABLED)
 
-#include <pthread.h>
 #include "os/mutex.h"
+#include <pthread.h>
 
 class MutexPosix : public Mutex {
 
-	pthread_mutexattr_t attr;	
+	pthread_mutexattr_t attr;
 	pthread_mutex_t mutex;
-	
+
 	static Mutex *create_func_posix(bool p_recursive);
-	
+
 public:
-
-	virtual void lock(); 
+	virtual void lock();
 	virtual void unlock();
-	virtual Error try_lock(); 
-
+	virtual Error try_lock();
 
 	static void make_default();
 
 	MutexPosix(bool p_recursive);
-	
-	~MutexPosix();
 
+	~MutexPosix();
 };
 
 #endif

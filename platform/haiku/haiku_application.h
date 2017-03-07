@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -29,13 +29,12 @@
 #ifndef HAIKU_APPLICATION_H
 #define HAIKU_APPLICATION_H
 
-#include <kernel/image.h> // needed for image_id
 #include <Application.h>
+#include <kernel/image.h> // needed for image_id
 
-class HaikuApplication : public BApplication
-{
+class HaikuApplication : public BApplication {
 public:
-   HaikuApplication();
+	HaikuApplication();
 };
 
 #endif

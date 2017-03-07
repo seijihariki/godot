@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -26,28 +26,28 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
-#include "servers/audio/audio_server_sw.h"
+#include "servers/audio_server.h"
 
-#include "core/os/thread.h"
 #include "core/os/mutex.h"
+#include "core/os/thread.h"
 
 #include <sys/asoundlib.h>
 
-class AudioDriverBB10 : public AudioDriverSW {
+class AudioDriverBB10 : public AudioDriver {
 
-	Thread* thread;
-	Mutex* mutex;
+	Thread *thread;
+	Mutex *mutex;
 
-	snd_pcm_t* pcm_handle;
+	snd_pcm_t *pcm_handle;
 
-	int32_t* samples_in;
-	int16_t* samples_out;
+	int32_t *samples_in;
+	int16_t *samples_out;
 	int sample_buf_count;
 
-	static void thread_func(void* p_udata);
+	static void thread_func(void *p_udata);
 
 	int mix_rate;
-	OutputFormat output_format;
+	SpeakerMode speaker_mode;
 
 	int pcm_frag_size;
 	int pcm_max_frags;
@@ -58,16 +58,15 @@ class AudioDriverBB10 : public AudioDriverSW {
 	bool pcm_open;
 
 public:
-
-	const char* get_name() const {
+	const char *get_name() const {
 		return "BB10";
 	};
 
 	virtual Error init();
-	virtual Error init(const char* p_name);
+	virtual Error init(const char *p_name);
 	virtual void start();
 	virtual int get_mix_rate() const;
-	virtual OutputFormat get_output_format() const;
+	virtual SpeakerMode get_speaker_mode() const;
 	virtual void lock();
 	virtual void unlock();
 	virtual void finish();
@@ -75,4 +74,3 @@ public:
 	AudioDriverBB10();
 	~AudioDriverBB10();
 };
-
