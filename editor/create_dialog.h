@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -39,8 +40,6 @@
 /**
 	@author Juan Linietsky <reduzio@gmail.com>
 */
-
-#if 1
 
 class CreateDialog : public ConfirmationDialog {
 
@@ -92,47 +91,9 @@ public:
 	void set_base_type(const String &p_base);
 	String get_base_type() const;
 
-	void popup(bool p_dontclear);
+	void popup_create(bool p_dontclear);
 
 	CreateDialog();
 };
-
-#else
-
-//old create dialog, disabled
-
-class CreateDialog : public ConfirmationDialog {
-
-	GDCLASS(CreateDialog, ConfirmationDialog);
-
-	Tree *tree;
-	Button *create;
-	Button *cancel;
-	LineEdit *filter;
-
-	void update_tree();
-	void _create();
-	void _cancel();
-	void add_type(const String &p_type, HashMap<String, TreeItem *> &p_types, TreeItem
-																					  *p_root);
-
-	String base;
-	void _text_changed(String p_text);
-	virtual void _post_popup() { tree->grab_focus(); }
-
-protected:
-	static void _bind_methods();
-	void _notification(int p_what);
-
-public:
-	Object *instance_selected();
-
-	void set_base_type(const String &p_base);
-	String get_base_type() const;
-	CreateDialog();
-	~CreateDialog();
-};
-
-#endif
 
 #endif

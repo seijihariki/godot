@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -84,7 +85,7 @@ void Tabs::_gui_input(const InputEvent &p_event) {
 
 		Point2 pos(p_event.mouse_motion.x, p_event.mouse_motion.y);
 
-		hilite_arrow = -1;
+		highlight_arrow = -1;
 		if (buttons_visible) {
 
 			Ref<Texture> incr = get_icon("increment");
@@ -93,9 +94,9 @@ void Tabs::_gui_input(const InputEvent &p_event) {
 			int limit = get_size().width - incr->get_width() - decr->get_width();
 
 			if (pos.x > limit + decr->get_width()) {
-				hilite_arrow = 1;
+				highlight_arrow = 1;
 			} else if (pos.x > limit) {
-				hilite_arrow = 0;
+				highlight_arrow = 0;
 			}
 		}
 
@@ -267,8 +268,8 @@ void Tabs::_notification(int p_what) {
 
 			Ref<Texture> incr = get_icon("increment");
 			Ref<Texture> decr = get_icon("decrement");
-			Ref<Texture> incr_hl = get_icon("increment_hilite");
-			Ref<Texture> decr_hl = get_icon("decrement_hilite");
+			Ref<Texture> incr_hl = get_icon("increment_highlight");
+			Ref<Texture> decr_hl = get_icon("decrement_highlight");
 
 			int limit = get_size().width - incr->get_size().width - decr->get_size().width;
 
@@ -384,12 +385,12 @@ void Tabs::_notification(int p_what) {
 				int vofs = (get_size().height - incr->get_size().height) / 2;
 
 				if (offset > 0)
-					draw_texture(hilite_arrow == 0 ? decr_hl : decr, Point2(limit, vofs));
+					draw_texture(highlight_arrow == 0 ? decr_hl : decr, Point2(limit, vofs));
 				else
 					draw_texture(decr, Point2(limit, vofs), Color(1, 1, 1, 0.5));
 
 				if (missing_right)
-					draw_texture(hilite_arrow == 1 ? incr_hl : incr, Point2(limit + decr->get_size().width, vofs));
+					draw_texture(highlight_arrow == 1 ? incr_hl : incr, Point2(limit + decr->get_size().width, vofs));
 				else
 					draw_texture(incr, Point2(limit + decr->get_size().width, vofs), Color(1, 1, 1, 0.5));
 
@@ -676,7 +677,7 @@ Tabs::Tabs() {
 	tab_align = ALIGN_CENTER;
 	rb_hover = -1;
 	rb_pressing = false;
-	hilite_arrow = -1;
+	highlight_arrow = -1;
 
 	cb_hover = -1;
 	cb_pressing = false;

@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -155,6 +156,8 @@ void ProjectExportDialog::_edit_preset(int p_index) {
 		delete_preset->set_disabled(true);
 		sections->hide();
 		patches->clear();
+		export_error->hide();
+		export_templates_error->hide();
 		return;
 	}
 
@@ -204,6 +207,38 @@ void ProjectExportDialog::_edit_preset(int p_index) {
 	patch_add->add_button(0, get_icon("folder", "FileDialog"), 1);
 
 	_fill_resource_tree();
+
+	bool needs_templates;
+	String error;
+	if (!current->get_platform()->can_export(current, error, needs_templates)) {
+
+		if (error != String()) {
+
+			Vector<String> items = error.split("\n");
+			error = "";
+			for (int i = 0; i < items.size(); i++) {
+				if (i > 0)
+					error += "\n";
+				error += " - " + items[i];
+			}
+
+			export_error->set_text(error);
+			export_error->show();
+		} else {
+			export_error->hide();
+		}
+		if (needs_templates)
+			export_templates_error->show();
+		else
+			export_templates_error->hide();
+
+		export_button->set_disabled(true);
+
+	} else {
+		export_error->show();
+		export_templates_error->hide();
+		export_button->set_disabled(false);
+	}
 
 	updating = false;
 }
@@ -279,6 +314,12 @@ void ProjectExportDialog::_patch_deleted() {
 		current->remove_patch(patch_index);
 		_edit_preset(presets->get_current());
 	}
+}
+
+void ProjectExportDialog::_update_parameters(const String &p_edited_property) {
+
+	_edit_preset(presets->get_current());
+	parameters->update_tree();
 }
 
 void ProjectExportDialog::_runnable_pressed() {
@@ -607,10 +648,44 @@ void ProjectExportDialog::_export_pck_zip_selected(const String &p_path) {
 	}
 }
 
+void ProjectExportDialog::_open_export_template_manager() {
+
+	EditorNode::get_singleton()->open_export_template_manager();
+	hide();
+}
+
+void ProjectExportDialog::_export_project() {
+
+	Ref<EditorExportPreset> current = EditorExport::get_singleton()->get_export_preset(presets->get_current());
+	ERR_FAIL_COND(current.is_null());
+	Ref<EditorExportPlatform> platform = current->get_platform();
+	ERR_FAIL_COND(platform.is_null());
+
+	export_project->set_access(FileDialog::ACCESS_FILESYSTEM);
+	export_project->clear_filters();
+	String extension = platform->get_binary_extension();
+	if (extension != String()) {
+		export_project->add_filter("*." + extension + " ; " + platform->get_name() + " Export");
+	}
+
+	export_project->popup_centered_ratio();
+}
+
+void ProjectExportDialog::_export_project_to_path(const String &p_path) {
+
+	Ref<EditorExportPreset> current = EditorExport::get_singleton()->get_export_preset(presets->get_current());
+	ERR_FAIL_COND(current.is_null());
+	Ref<EditorExportPlatform> platform = current->get_platform();
+	ERR_FAIL_COND(platform.is_null());
+
+	Error err = platform->export_project(current, export_debug->is_pressed(), p_path, 0);
+}
+
 void ProjectExportDialog::_bind_methods() {
 
 	ClassDB::bind_method("_add_preset", &ProjectExportDialog::_add_preset);
 	ClassDB::bind_method("_edit_preset", &ProjectExportDialog::_edit_preset);
+	ClassDB::bind_method("_update_parameters", &ProjectExportDialog::_update_parameters);
 	ClassDB::bind_method("_runnable_pressed", &ProjectExportDialog::_runnable_pressed);
 	ClassDB::bind_method("_name_changed", &ProjectExportDialog::_name_changed);
 	ClassDB::bind_method("_delete_preset", &ProjectExportDialog::_delete_preset);
@@ -627,14 +702,20 @@ void ProjectExportDialog::_bind_methods() {
 	ClassDB::bind_method("_patch_edited", &ProjectExportDialog::_patch_edited);
 	ClassDB::bind_method("_export_pck_zip", &ProjectExportDialog::_export_pck_zip);
 	ClassDB::bind_method("_export_pck_zip_selected", &ProjectExportDialog::_export_pck_zip_selected);
+	ClassDB::bind_method("_open_export_template_manager", &ProjectExportDialog::_open_export_template_manager);
+	ClassDB::bind_method("_export_project", &ProjectExportDialog::_export_project);
+	ClassDB::bind_method("_export_project_to_path", &ProjectExportDialog::_export_project_to_path);
 }
 ProjectExportDialog::ProjectExportDialog() {
 
 	set_title(TTR("Export"));
 	set_resizable(true);
 
+	VBoxContainer *main_vb = memnew(VBoxContainer);
+	add_child(main_vb);
 	HBoxContainer *hbox = memnew(HBoxContainer);
-	add_child(hbox);
+	main_vb->add_child(hbox);
+	hbox->set_v_size_flags(SIZE_EXPAND_FILL);
 
 	VBoxContainer *preset_vb = memnew(VBoxContainer);
 	preset_vb->set_h_size_flags(Control::SIZE_EXPAND_FILL);
@@ -673,6 +754,7 @@ ProjectExportDialog::ProjectExportDialog() {
 	settings_vb->add_child(runnable);
 
 	sections = memnew(TabContainer);
+	sections->set_tab_align(TabContainer::ALIGN_LEFT);
 	settings_vb->add_child(sections);
 	sections->set_v_size_flags(SIZE_EXPAND_FILL);
 
@@ -682,6 +764,7 @@ ProjectExportDialog::ProjectExportDialog() {
 	parameters->hide_top_label();
 	parameters->set_v_size_flags(SIZE_EXPAND_FILL);
 	parameters->set_hide_script(true);
+	parameters->connect("property_edited", this, "_update_parameters");
 
 	VBoxContainer *resources_vb = memnew(VBoxContainer);
 	sections->add_child(resources_vb);
@@ -769,6 +852,36 @@ ProjectExportDialog::ProjectExportDialog() {
 	export_pck_zip->set_mode(FileDialog::MODE_SAVE_FILE);
 	add_child(export_pck_zip);
 	export_pck_zip->connect("file_selected", this, "_export_pck_zip_selected");
+
+	export_error = memnew(Label);
+	main_vb->add_child(export_error);
+	export_error->hide();
+	export_error->add_color_override("font_color", Color(1, 0.5, 0.5));
+
+	export_templates_error = memnew(HBoxContainer);
+	main_vb->add_child(export_templates_error);
+	export_templates_error->hide();
+
+	Label *export_error2 = memnew(Label);
+	export_templates_error->add_child(export_error2);
+	export_error2->add_color_override("font_color", Color(1, 0.5, 0.5));
+	export_error2->set_text(" - " + TTR("Export templates for this platform are missing:") + " ");
+
+	LinkButton *download_templates = memnew(LinkButton);
+	download_templates->set_text(TTR("Manage Export Templates"));
+	export_templates_error->add_child(download_templates);
+	download_templates->connect("pressed", this, "_open_export_template_manager");
+
+	export_project = memnew(FileDialog);
+	export_project->set_access(FileDialog::ACCESS_FILESYSTEM);
+	add_child(export_project);
+	export_project->connect("file_selected", this, "_export_project_to_path");
+	export_button->connect("pressed", this, "_export_project");
+
+	export_debug = memnew(CheckButton);
+	export_debug->set_text(TTR("Export With Debug"));
+	export_debug->set_pressed(true);
+	export_project->get_vbox()->add_child(export_debug);
 
 	set_hide_on_ok(false);
 

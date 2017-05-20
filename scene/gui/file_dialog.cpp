@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -335,8 +336,8 @@ void FileDialog::update_file_list() {
 		dirs.push_back("..");
 	}
 
-	dirs.sort_custom<NoCaseComparator>();
-	files.sort_custom<NoCaseComparator>();
+	dirs.sort_custom<NaturalNoCaseComparator>();
+	files.sort_custom<NaturalNoCaseComparator>();
 
 	while (!dirs.empty()) {
 		String &dir_name = dirs.front()->get();

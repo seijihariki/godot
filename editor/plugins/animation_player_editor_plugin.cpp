@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -86,7 +87,7 @@ void AnimationPlayerEditor::_notification(int p_what) {
 		}
 
 		last_active = player->is_playing();
-		//seek->set_val(player->get_pos());
+		//seek->set_val(player->get_position());
 		updating = false;
 	}
 
@@ -116,8 +117,6 @@ void AnimationPlayerEditor::_notification(int p_what) {
 		tool_anim->get_popup()->connect("id_pressed", this, "_animation_tool_menu");
 
 		blend_editor.next->connect("item_selected", this, "_blend_editor_next_changed");
-
-		nodename->set_icon(get_icon("AnimationPlayer", "EditorIcons"));
 
 		/*
 		anim_editor_load->set_normal_texture( get_icon("AnimGet","EditorIcons"));
@@ -789,10 +788,6 @@ void AnimationPlayerEditor::_update_player() {
 		player->get_animation_list(&animlist);
 
 	animation->clear();
-	if (player)
-		nodename->set_text(player->get_name());
-	else
-		nodename->set_text("<empty>");
 
 	add_anim->set_disabled(player == NULL);
 	load_anim->set_disabled(player == NULL);
@@ -1366,8 +1361,6 @@ AnimationPlayerEditor::AnimationPlayerEditor(EditorNode *p_editor) {
 	//tool_anim->get_popup()->add_item("Edit Anim Resource",TOOL_PASTE_ANIM);
 	hb->add_child(tool_anim);
 
-	nodename = memnew(Button);
-	hb->add_child(nodename);
 	pin = memnew(ToolButton);
 	pin->set_toggle_mode(true);
 	hb->add_child(pin);
@@ -1385,13 +1378,13 @@ AnimationPlayerEditor::AnimationPlayerEditor(EditorNode *p_editor) {
 	add_child(name_dialog);
 	name = memnew(LineEdit);
 	name_dialog->add_child(name);
-	name->set_pos(Point2(18, 30));
+	name->set_position(Point2(18, 30));
 	name->set_anchor_and_margin(MARGIN_RIGHT, ANCHOR_END, 10);
 	name_dialog->register_text_enter(name);
 
 	l = memnew(Label);
 	l->set_text(TTR("Animation Name:"));
-	l->set_pos(Point2(10, 10));
+	l->set_position(Point2(10, 10));
 
 	name_dialog->add_child(l);
 	name_title = l;

@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -151,7 +152,6 @@ void HaikuDirectWindow::HandleMouseButton(BMessage *message) {
 	*/
 
 	InputEvent mouse_event;
-	mouse_event.ID = ++event_id;
 	mouse_event.type = InputEvent::MOUSE_BUTTON;
 	mouse_event.device = 0;
 
@@ -208,7 +208,6 @@ void HaikuDirectWindow::HandleMouseMoved(BMessage *message) {
 	Point2i rel = pos - last_mouse_position;
 
 	InputEvent motion_event;
-	motion_event.ID = ++event_id;
 	motion_event.type = InputEvent::MOUSE_MOTION;
 	motion_event.device = 0;
 
@@ -216,7 +215,7 @@ void HaikuDirectWindow::HandleMouseMoved(BMessage *message) {
 	motion_event.mouse_motion.button_mask = GetMouseButtonState(buttons);
 	motion_event.mouse_motion.x = pos.x;
 	motion_event.mouse_motion.y = pos.y;
-	input->set_mouse_pos(pos);
+	input->set_mouse_position(pos);
 	motion_event.mouse_motion.global_x = pos.x;
 	motion_event.mouse_motion.global_y = pos.y;
 	motion_event.mouse_motion.speed_x = input->get_last_mouse_speed().x;
@@ -237,7 +236,6 @@ void HaikuDirectWindow::HandleMouseWheelChanged(BMessage *message) {
 	}
 
 	InputEvent mouse_event;
-	mouse_event.ID = ++event_id;
 	mouse_event.type = InputEvent::MOUSE_BUTTON;
 	mouse_event.device = 0;
 
@@ -252,7 +250,6 @@ void HaikuDirectWindow::HandleMouseWheelChanged(BMessage *message) {
 	mouse_event.mouse_button.pressed = true;
 	input->parse_input_event(mouse_event);
 
-	mouse_event.ID = ++event_id;
 	mouse_event.mouse_button.pressed = false;
 	input->parse_input_event(mouse_event);
 }
@@ -275,7 +272,6 @@ void HaikuDirectWindow::HandleKeyboardEvent(BMessage *message) {
 	}
 
 	InputEvent event;
-	event.ID = ++event_id;
 	event.type = InputEvent::KEY;
 	event.device = 0;
 	event.key.mod = GetKeyModifierState(modifiers);
@@ -289,7 +285,7 @@ void HaikuDirectWindow::HandleKeyboardEvent(BMessage *message) {
 		event.key.unicode = BUnicodeChar::FromUTF8(&bytes);
 	}
 
-	//make it consistent accross platforms.
+	//make it consistent across platforms.
 	if (event.key.scancode == KEY_BACKTAB) {
 		event.key.scancode = KEY_TAB;
 		event.key.mod.shift = true;
@@ -313,7 +309,6 @@ void HaikuDirectWindow::HandleKeyboardModifierEvent(BMessage *message) {
 	int32 key = old_modifiers ^ modifiers;
 
 	InputEvent event;
-	event.ID = ++event_id;
 	event.type = InputEvent::KEY;
 	event.device = 0;
 	event.key.mod = GetKeyModifierState(modifiers);

@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -89,32 +90,20 @@ enum {
 	JOY_DPAD_LEFT = JOY_BUTTON_14,
 	JOY_DPAD_RIGHT = JOY_BUTTON_15,
 
-	// a little history about game controllers (who copied who)
+	JOY_SONY_CIRCLE = JOY_BUTTON_1,
+	JOY_SONY_X = JOY_BUTTON_0,
+	JOY_SONY_SQUARE = JOY_BUTTON_2,
+	JOY_SONY_TRIANGLE = JOY_BUTTON_3,
 
-	JOY_SNES_B = JOY_BUTTON_0,
-	JOY_SNES_A = JOY_BUTTON_1,
-	JOY_SNES_Y = JOY_BUTTON_2,
-	JOY_SNES_X = JOY_BUTTON_3,
+	JOY_XBOX_A = JOY_BUTTON_0,
+	JOY_XBOX_B = JOY_BUTTON_1,
+	JOY_XBOX_X = JOY_BUTTON_2,
+	JOY_XBOX_Y = JOY_BUTTON_3,
 
-	JOY_SONY_CIRCLE = JOY_SNES_A,
-	JOY_SONY_X = JOY_SNES_B,
-	JOY_SONY_SQUARE = JOY_SNES_Y,
-	JOY_SONY_TRIANGLE = JOY_SNES_X,
-
-	JOY_SEGA_B = JOY_SNES_A,
-	JOY_SEGA_A = JOY_SNES_B,
-	JOY_SEGA_X = JOY_SNES_Y,
-	JOY_SEGA_Y = JOY_SNES_X,
-
-	JOY_XBOX_B = JOY_SEGA_B,
-	JOY_XBOX_A = JOY_SEGA_A,
-	JOY_XBOX_X = JOY_SEGA_X,
-	JOY_XBOX_Y = JOY_SEGA_Y,
-
-	JOY_DS_A = JOY_SNES_A,
-	JOY_DS_B = JOY_SNES_B,
-	JOY_DS_X = JOY_SNES_X,
-	JOY_DS_Y = JOY_SNES_Y,
+	JOY_DS_A = JOY_BUTTON_1,
+	JOY_DS_B = JOY_BUTTON_0,
+	JOY_DS_X = JOY_BUTTON_3,
+	JOY_DS_Y = JOY_BUTTON_2,
 
 	JOY_WII_C = JOY_BUTTON_5,
 	JOY_WII_Z = JOY_BUTTON_6,
@@ -134,14 +123,11 @@ enum {
 	JOY_AXIS_7 = 7,
 	JOY_AXIS_MAX = 8,
 
-	JOY_ANALOG_0_X = JOY_AXIS_0,
-	JOY_ANALOG_0_Y = JOY_AXIS_1,
+	JOY_ANALOG_LX = JOY_AXIS_0,
+	JOY_ANALOG_LY = JOY_AXIS_1,
 
-	JOY_ANALOG_1_X = JOY_AXIS_2,
-	JOY_ANALOG_1_Y = JOY_AXIS_3,
-
-	JOY_ANALOG_2_X = JOY_AXIS_4,
-	JOY_ANALOG_2_Y = JOY_AXIS_5,
+	JOY_ANALOG_RX = JOY_AXIS_2,
+	JOY_ANALOG_RY = JOY_AXIS_3,
 
 	JOY_ANALOG_L2 = JOY_AXIS_6,
 	JOY_ANALOG_R2 = JOY_AXIS_7,
@@ -202,6 +188,7 @@ struct InputEventMouse {
 
 struct InputEventMouseButton : public InputEventMouse {
 
+	double factor;
 	int button_index;
 	bool pressed; //otherwise released
 	bool doubleclick; //last even less than doubleclick time
@@ -286,7 +273,10 @@ struct InputEvent {
 	InputEvent xform_by(const Transform2D &p_xform) const;
 	bool operator==(const InputEvent &p_event) const;
 	operator String() const;
-	InputEvent() { zeromem(this, sizeof(InputEvent)); }
+	InputEvent() {
+		zeromem(this, sizeof(InputEvent));
+		mouse_button.factor = 1;
+	}
 };
 
 #endif

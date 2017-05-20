@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -119,7 +120,6 @@ private:
 
 	InputEvent event_queue[MAX_EVENTS];
 	int event_count;
-	int last_event_id;
 	void queue_event(const InputEvent &p_event);
 
 	String data_dir;
@@ -145,12 +145,17 @@ public:
 	void update_magnetometer(float p_x, float p_y, float p_z);
 	void update_gyroscope(float p_x, float p_y, float p_z);
 
+	int get_unused_joy_id();
+	void joy_connection_changed(int p_idx, bool p_connected, String p_name);
+	void joy_button(int p_device, int p_button, bool p_pressed);
+	void joy_axis(int p_device, int p_axis, const InputDefault::JoyAxis &p_value);
+
 	static OSIPhone *get_singleton();
 
 	virtual void set_mouse_show(bool p_show);
 	virtual void set_mouse_grab(bool p_grab);
 	virtual bool is_mouse_grab_enabled() const;
-	virtual Point2 get_mouse_pos() const;
+	virtual Point2 get_mouse_position() const;
 	virtual int get_mouse_button_state() const;
 	virtual void set_window_title(const String &p_title);
 

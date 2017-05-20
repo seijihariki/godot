@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -210,7 +211,7 @@ void DocData::generate(bool p_basic_types) {
 		for (List<MethodInfo>::Element *E = method_list.front(); E; E = E->next()) {
 
 			if (E->get().name == "" || (E->get().name[0] == '_' && !(E->get().flags & METHOD_FLAG_VIRTUAL)))
-				continue; //hiden, dont count
+				continue; //hidden, don't count
 
 			MethodDoc method;
 
@@ -294,8 +295,8 @@ void DocData::generate(bool p_basic_types) {
 							case Variant::REAL:
 								//keep it
 								break;
-							case Variant::STRING: // 15
-							case Variant::NODE_PATH: // 15
+							case Variant::STRING:
+							case Variant::NODE_PATH:
 								default_arg_text = "\"" + default_arg_text + "\"";
 								break;
 							case Variant::TRANSFORM:
@@ -306,19 +307,19 @@ void DocData::generate(bool p_basic_types) {
 								default_arg_text = Variant::get_type_name(default_arg.get_type()) + "(" + default_arg_text + ")";
 								break;
 
-							case Variant::RECT3: //sorry naming convention fail :( not like it's used often // 10
+							case Variant::RECT3:
 							case Variant::COLOR:
 							case Variant::PLANE:
 							case Variant::POOL_BYTE_ARRAY:
 							case Variant::POOL_INT_ARRAY:
 							case Variant::POOL_REAL_ARRAY:
-							case Variant::POOL_STRING_ARRAY: //25
+							case Variant::POOL_STRING_ARRAY:
 							case Variant::POOL_VECTOR2_ARRAY:
 							case Variant::POOL_VECTOR3_ARRAY:
 							case Variant::POOL_COLOR_ARRAY:
 								default_arg_text = Variant::get_type_name(default_arg.get_type()) + "(" + default_arg_text + ")";
 								break;
-							case Variant::VECTOR2: // 5
+							case Variant::VECTOR2:
 							case Variant::RECT2:
 							case Variant::VECTOR3:
 							case Variant::QUAT:
@@ -331,14 +332,10 @@ void DocData::generate(bool p_basic_types) {
 									break;
 								}
 							case Variant::INPUT_EVENT:
-							case Variant::DICTIONARY: // 20
+							case Variant::DICTIONARY:
 							case Variant::ARRAY:
 							case Variant::_RID:
-							case Variant::IMAGE:
-								//case Variant::RESOURCE:
 
-								default_arg_text = Variant::get_type_name(default_arg.get_type()) + "()";
-								break;
 							default: {}
 						}
 

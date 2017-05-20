@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -39,7 +40,7 @@
 ProjectSettings *ProjectSettings::singleton = NULL;
 
 static const char *_button_names[JOY_BUTTON_MAX] = {
-	"PS X, XBox A, Nintendo B",
+	"PS Cross, XBox A, Nintendo B",
 	"PS Circle, XBox B, Nintendo A",
 	"PS Square, XBox X, Nintendo Y",
 	"PS Triangle, XBox Y, Nintendo X",
@@ -104,6 +105,9 @@ void ProjectSettings::_notification(int p_what) {
 		} break;
 		case NOTIFICATION_POPUP_HIDE: {
 			EditorSettings::get_singleton()->set("interface/dialogs/project_settings_bounds", get_rect());
+		} break;
+		case EditorSettings::NOTIFICATION_EDITOR_SETTINGS_CHANGED: {
+			_update_actions();
 		} break;
 	}
 }
@@ -396,12 +400,12 @@ void ProjectSettings::_action_button_pressed(Object *p_obj, int p_column, int p_
 	ERR_FAIL_COND(!ti);
 
 	if (p_id == 1) {
-		Point2 ofs = input_editor->get_global_pos();
+		Point2 ofs = input_editor->get_global_position();
 		Rect2 ir = input_editor->get_item_rect(ti);
 		ir.pos.y -= input_editor->get_scroll().y;
 		ofs += ir.pos + ir.size;
 		ofs.x -= 100;
-		popup_add->set_pos(ofs);
+		popup_add->set_position(ofs);
 		popup_add->popup();
 		add_at = "input/" + ti->get_text(0);
 
@@ -480,9 +484,9 @@ void ProjectSettings::_update_actions() {
 		TreeItem *item = input_editor->create_item(root);
 		//item->set_cell_mode(0,TreeItem::CELL_MODE_CHECK);
 		item->set_text(0, name);
-		item->add_button(0, get_icon("Add", "EditorIcons"), 1);
+		item->add_button(0, get_icon("Add", "EditorIcons"), 1, false, TTR("Add Event"));
 		if (!GlobalConfig::get_singleton()->get_input_presets().find(pi.name)) {
-			item->add_button(0, get_icon("Remove", "EditorIcons"), 2);
+			item->add_button(0, get_icon("Remove", "EditorIcons"), 2, false, TTR("Remove"));
 			item->set_editable(0, true);
 		}
 		item->set_custom_bg_color(0, get_color("prop_subsection", "Editor"));
@@ -552,7 +556,7 @@ void ProjectSettings::_update_actions() {
 					action->set_icon(0, get_icon("JoyAxis", "EditorIcons"));
 				} break;
 			}
-			action->add_button(0, get_icon("Remove", "EditorIcons"), 2);
+			action->add_button(0, get_icon("Remove", "EditorIcons"), 2, false, TTR("Remove"));
 			action->set_metadata(0, i);
 			action->set_meta("__input", ie);
 		}
@@ -1011,7 +1015,7 @@ void ProjectSettings::_update_translations() {
 			t->set_text(0, translations[i].replace_first("res://", ""));
 			t->set_tooltip(0, translations[i]);
 			t->set_metadata(0, i);
-			t->add_button(0, get_icon("Del", "EditorIcons"), 0);
+			t->add_button(0, get_icon("Del", "EditorIcons"), 0, false, TTR("Remove"));
 		}
 	}
 
@@ -1057,7 +1061,7 @@ void ProjectSettings::_update_translations() {
 			t->set_text(0, keys[i].replace_first("res://", ""));
 			t->set_tooltip(0, keys[i]);
 			t->set_metadata(0, keys[i]);
-			t->add_button(0, get_icon("Del", "EditorIcons"), 0);
+			t->add_button(0, get_icon("Del", "EditorIcons"), 0, false, TTR("Remove"));
 			if (keys[i] == remap_selected) {
 				t->select(0);
 				translation_res_option_add_button->set_disabled(false);
@@ -1075,7 +1079,7 @@ void ProjectSettings::_update_translations() {
 					t2->set_text(0, path.replace_first("res://", ""));
 					t2->set_tooltip(0, path);
 					t2->set_metadata(0, j);
-					t2->add_button(0, get_icon("Del", "EditorIcons"), 0);
+					t2->add_button(0, get_icon("Del", "EditorIcons"), 0, false, TTR("Remove"));
 					t2->set_cell_mode(1, TreeItem::CELL_MODE_RANGE);
 					t2->set_text(1, langnames);
 					t2->set_editable(1, true);
@@ -1167,12 +1171,13 @@ void ProjectSettings::_bind_methods() {
 ProjectSettings::ProjectSettings(EditorData *p_data) {
 
 	singleton = this;
-	set_title(TTR("Project Settings (godot.cfg)"));
+	set_title(TTR("Project Settings (project.godot)"));
 	set_resizable(true);
 	undo_redo = &p_data->get_undo_redo();
 	data = p_data;
 
 	tab_container = memnew(TabContainer);
+	tab_container->set_tab_align(TabContainer::ALIGN_LEFT);
 	add_child(tab_container);
 	//set_child_rect(tab_container);
 
@@ -1263,7 +1268,6 @@ ProjectSettings::ProjectSettings(EditorData *p_data) {
 	//globals_editor->hide_top_label();
 	globals_editor->set_v_size_flags(Control::SIZE_EXPAND_FILL);
 	globals_editor->get_property_editor()->register_text_enter(search_box);
-	globals_editor->get_property_editor()->set_capitalize_paths(false);
 	globals_editor->get_property_editor()->get_scene_tree()->connect("cell_selected", this, "_item_selected");
 	globals_editor->get_property_editor()->connect("property_toggled", this, "_item_checked", varray(), CONNECT_DEFERRED);
 	globals_editor->get_property_editor()->connect("property_edited", this, "_settings_prop_edited");
@@ -1325,7 +1329,7 @@ ProjectSettings::ProjectSettings(EditorData *p_data) {
 
 	l = memnew(Label);
 	vbc->add_child(l);
-	l->set_pos(Point2(6, 5));
+	l->set_position(Point2(6, 5));
 	l->set_text(TTR("Action:"));
 
 	hbc = memnew(HBoxContainer);
@@ -1415,6 +1419,7 @@ ProjectSettings::ProjectSettings(EditorData *p_data) {
 
 	//translations
 	TabContainer *translations = memnew(TabContainer);
+	translations->set_tab_align(TabContainer::ALIGN_LEFT);
 	translations->set_name(TTR("Localization"));
 	tab_container->add_child(translations);
 

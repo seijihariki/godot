@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -462,7 +463,7 @@ Node::PauseMode Node::get_pause_mode() const {
 
 void Node::_propagate_pause_owner(Node *p_owner) {
 
-	if (data.pause_mode != PAUSE_MODE_INHERIT)
+	if (this != p_owner && data.pause_mode != PAUSE_MODE_INHERIT)
 		return;
 	data.pause_owner = p_owner;
 	for (int i = 0; i < data.children.size(); i++) {
@@ -1719,6 +1720,9 @@ void Node::get_owned_by(Node *p_by, List<Node *> *p_owned) {
 
 void Node::_set_owner_nocheck(Node *p_owner) {
 
+	if (data.owner == p_owner)
+		return;
+
 	ERR_FAIL_COND(data.owner);
 	data.owner = p_owner;
 	data.owner->data.owned.push_back(this);
@@ -2020,12 +2024,13 @@ void Node::remove_and_skip() {
 
 		bool clear = true;
 		for (int i = 0; i < data.children.size(); i++) {
-			if (!data.children[i]->get_owner())
+			Node *c_node = data.children[i];
+			if (!c_node->get_owner())
 				continue;
 
-			remove_child(data.children[i]);
-			data.children[i]->_propagate_replace_owner(this, NULL);
-			children.push_back(data.children[i]);
+			remove_child(c_node);
+			c_node->_propagate_replace_owner(this, NULL);
+			children.push_back(c_node);
 			clear = false;
 			break;
 		}
@@ -2036,9 +2041,9 @@ void Node::remove_and_skip() {
 
 	while (!children.empty()) {
 
-		Node *c = children.front()->get();
-		data.parent->add_child(c);
-		c->_propagate_replace_owner(NULL, new_owner);
+		Node *c_node = children.front()->get();
+		data.parent->add_child(c_node);
+		c_node->_propagate_replace_owner(NULL, new_owner);
 		children.pop_front();
 	}
 
@@ -2059,10 +2064,14 @@ void Node::set_editable_instance(Node *p_node, bool p_editable) {
 	ERR_FAIL_NULL(p_node);
 	ERR_FAIL_COND(!is_a_parent_of(p_node));
 	NodePath p = get_path_to(p_node);
-	if (!p_editable)
+	if (!p_editable) {
 		data.editable_instances.erase(p);
-	else
+		// Avoid this flag being needlessly saved;
+		// also give more visual feedback if editable children is reenabled
+		set_display_folded(false);
+	} else {
 		data.editable_instances[p] = true;
+	}
 }
 
 bool Node::is_editable_instance(Node *p_node) const {
@@ -2498,8 +2507,11 @@ void Node::_replace_connections_target(Node *p_new_target) {
 
 		Connection &c = E->get();
 
-		c.source->disconnect(c.signal, this, c.method);
-		c.source->connect(c.signal, p_new_target, c.method, c.binds, c.flags);
+		if (c.flags & CONNECT_PERSIST) {
+			c.source->disconnect(c.signal, this, c.method);
+			ERR_CONTINUE(!p_new_target->has_method(c.method));
+			c.source->connect(c.signal, p_new_target, c.method, c.binds, c.flags);
+		}
 	}
 }
 
@@ -2907,6 +2919,7 @@ void Node::_bind_methods() {
 	BIND_CONSTANT(DUPLICATE_SIGNALS);
 	BIND_CONSTANT(DUPLICATE_GROUPS);
 	BIND_CONSTANT(DUPLICATE_SCRIPTS);
+	BIND_CONSTANT(DUPLICATE_USE_INSTANCING);
 
 	ADD_SIGNAL(MethodInfo("renamed"));
 	ADD_SIGNAL(MethodInfo("tree_entered"));

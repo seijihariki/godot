@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -276,7 +277,7 @@ void SceneTreeDock::_tool_selected(int p_tool, bool p_confirm_override) {
 			if (!_validate_no_foreign())
 				break;
 			*/
-			create_dialog->popup(true);
+			create_dialog->popup_create(true);
 		} break;
 		case TOOL_INSTANCE: {
 
@@ -316,7 +317,7 @@ void SceneTreeDock::_tool_selected(int p_tool, bool p_confirm_override) {
 		} break;
 		case TOOL_REPLACE: {
 
-			create_dialog->popup(false);
+			create_dialog->popup_create(false);
 		} break;
 		case TOOL_CONNECT: {
 
@@ -361,8 +362,7 @@ void SceneTreeDock::_tool_selected(int p_tool, bool p_confirm_override) {
 			else {
 				String path = selected->get_filename();
 				script_create_dialog->config(selected->get_class(), path);
-				script_create_dialog->popup_centered(Size2(300, 290));
-				//script_create_dialog->popup_centered_minsize();
+				script_create_dialog->popup_centered();
 			}
 
 		} break;
@@ -680,7 +680,7 @@ void SceneTreeDock::_notification(int p_what) {
 			button_create_script->set_icon(get_icon("ScriptCreate", "EditorIcons"));
 			button_clear_script->set_icon(get_icon("ScriptRemove", "EditorIcons"));
 
-			filter_icon->set_texture(get_icon("Zoom", "EditorIcons"));
+			filter_icon->set_texture(get_icon("Search", "EditorIcons"));
 
 			EditorNode::get_singleton()->get_editor_selection()->connect("selection_changed", this, "_selection_changed");
 
@@ -1111,7 +1111,7 @@ void SceneTreeDock::_do_reparent(Node *p_new_parent, int p_position_in_parent, V
 			if (node->cast_to<Spatial>())
 				editor_data->get_undo_redo().add_do_method(node, "set_global_transform", node->cast_to<Spatial>()->get_global_transform());
 			if (node->cast_to<Control>())
-				editor_data->get_undo_redo().add_do_method(node, "set_global_pos", node->cast_to<Control>()->get_global_pos());
+				editor_data->get_undo_redo().add_do_method(node, "set_global_position", node->cast_to<Control>()->get_global_position());
 		}
 
 		editor_data->get_undo_redo().add_do_method(this, "_set_owners", edited_scene, owners);
@@ -1153,7 +1153,7 @@ void SceneTreeDock::_do_reparent(Node *p_new_parent, int p_position_in_parent, V
 			if (node->cast_to<Spatial>())
 				editor_data->get_undo_redo().add_undo_method(node, "set_transform", node->cast_to<Spatial>()->get_transform());
 			if (node->cast_to<Control>())
-				editor_data->get_undo_redo().add_undo_method(node, "set_pos", node->cast_to<Control>()->get_pos());
+				editor_data->get_undo_redo().add_undo_method(node, "set_position", node->cast_to<Control>()->get_position());
 		}
 	}
 
@@ -1570,7 +1570,7 @@ void SceneTreeDock::_normalize_drop(Node *&to_node, int &to_pos, int p_type) {
 		//drop at below selected node
 		if (to_node == EditorNode::get_singleton()->get_edited_scene()) {
 			//if at lower sibling of root node
-			to_pos = 0; //just insert at begining of root node
+			to_pos = 0; //just insert at beginning of root node
 			return;
 		}
 
@@ -1668,7 +1668,7 @@ void SceneTreeDock::_tree_rmb(const Vector2 &p_menu_pos) {
 		menu->add_icon_shortcut(get_icon("Instance", "EditorIcons"), ED_GET_SHORTCUT("scene_tree/instance_scene"), TOOL_INSTANCE);
 
 		menu->set_size(Size2(1, 1));
-		menu->set_pos(p_menu_pos);
+		menu->set_position(p_menu_pos);
 		menu->popup();
 		return;
 	}
@@ -1709,7 +1709,7 @@ void SceneTreeDock::_tree_rmb(const Vector2 &p_menu_pos) {
 	menu->add_separator();
 	menu->add_icon_shortcut(get_icon("Remove", "EditorIcons"), ED_SHORTCUT("scene_tree/delete", TTR("Delete Node(s)"), KEY_DELETE), TOOL_ERASE);
 	menu->set_size(Size2(1, 1));
-	menu->set_pos(p_menu_pos);
+	menu->set_position(p_menu_pos);
 	menu->popup();
 }
 
@@ -1790,6 +1790,7 @@ SceneTreeDock::SceneTreeDock(EditorNode *p_editor, Node *p_scene_root, EditorSel
 	VBoxContainer *vbc = this;
 
 	HBoxContainer *filter_hbc = memnew(HBoxContainer);
+	filter_hbc->add_constant_override("separate", 0);
 	ToolButton *tb;
 
 	ED_SHORTCUT("scene_tree/add_child_node", TTR("Add Child Node"), KEY_MASK_CMD | KEY_A);
@@ -1826,6 +1827,7 @@ SceneTreeDock::SceneTreeDock(EditorNode *p_editor, Node *p_scene_root, EditorSel
 	filter->set_h_size_flags(SIZE_EXPAND_FILL);
 	filter_hbc->add_child(filter);
 	filter_icon = memnew(TextureRect);
+	filter_icon->set_custom_minimum_size(Size2(24 * EDSCALE, 0));
 	filter_hbc->add_child(filter_icon);
 	filter_icon->set_stretch_mode(TextureRect::STRETCH_KEEP_CENTERED);
 	filter->connect("text_changed", this, "_filter_changed");

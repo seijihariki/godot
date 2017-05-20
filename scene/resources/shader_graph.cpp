@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -1469,6 +1470,7 @@ const ShaderGraph::InOutParamInfo ShaderGraph::inout_param_info[]={
 	{MODE_CANVAS_ITEM,SHADER_TYPE_FRAGMENT,"Var1","VAR1.rgb","",SLOT_TYPE_VEC,SLOT_IN},
 	{MODE_CANVAS_ITEM,SHADER_TYPE_FRAGMENT,"Var2","VAR2.rgb","",SLOT_TYPE_VEC,SLOT_IN},
 	{MODE_CANVAS_ITEM,SHADER_TYPE_FRAGMENT,"PointCoord","POINT_COORD","",SLOT_TYPE_VEC,SLOT_IN},
+	{MODE_CANVAS_ITEM,SHADER_TYPE_FRAGMENT,"Position","POSITION","",SLOT_TYPE_VEC,SLOT_IN},
 	//canvas item fragment out
 	{MODE_CANVAS_ITEM,SHADER_TYPE_FRAGMENT,"Color","COLOR.rgb","",SLOT_TYPE_VEC,SLOT_OUT},
 	{MODE_CANVAS_ITEM,SHADER_TYPE_FRAGMENT,"Alpha","COLOR.a","",SLOT_TYPE_SCALAR,SLOT_OUT},
@@ -1489,6 +1491,7 @@ const ShaderGraph::InOutParamInfo ShaderGraph::inout_param_info[]={
 	{MODE_CANVAS_ITEM,SHADER_TYPE_LIGHT,"Var1","VAR1.rgb","",SLOT_TYPE_VEC,SLOT_IN},
 	{MODE_CANVAS_ITEM,SHADER_TYPE_LIGHT,"Var2","VAR2.rgb","",SLOT_TYPE_VEC,SLOT_IN},
 	{MODE_CANVAS_ITEM,SHADER_TYPE_LIGHT,"PointCoord","POINT_COORD","",SLOT_TYPE_VEC,SLOT_IN},
+	{MODE_CANVAS_ITEM,SHADER_TYPE_LIGHT,"Position","POSITION","",SLOT_TYPE_VEC,SLOT_IN},
 	//canvas item light out
 	{MODE_CANVAS_ITEM,SHADER_TYPE_LIGHT,"LightColor","LIGHT.rgb","",SLOT_TYPE_VEC,SLOT_OUT},
 	{MODE_CANVAS_ITEM,SHADER_TYPE_LIGHT,"LightAlpha","LIGHT.a","",SLOT_TYPE_SCALAR,SLOT_OUT},

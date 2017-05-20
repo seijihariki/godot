@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -125,7 +126,7 @@ void RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int 
 	if (cfont.is_null())
 		cfont = p_base_font;
 
-	//line height should be the font height for the first time, this ensures that an empty line will never have zero height and succesive newlines are displayed
+	//line height should be the font height for the first time, this ensures that an empty line will never have zero height and successive newlines are displayed
 	int line_height = cfont->get_height();
 
 	Variant meta;
@@ -779,12 +780,14 @@ void RichTextLabel::_gui_input(InputEvent p_event) {
 			if (b.button_index == BUTTON_WHEEL_UP) {
 
 				if (scroll_active)
-					vscroll->set_value(vscroll->get_value() - vscroll->get_page() / 8);
+
+					vscroll->set_value(vscroll->get_value() - vscroll->get_page() * b.factor * 0.5 / 8);
 			}
 			if (b.button_index == BUTTON_WHEEL_DOWN) {
 
 				if (scroll_active)
-					vscroll->set_value(vscroll->get_value() + vscroll->get_page() / 8);
+
+					vscroll->set_value(vscroll->get_value() + vscroll->get_page() * b.factor * 0.5 / 8);
 			}
 		} break;
 		case InputEvent::KEY: {

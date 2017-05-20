@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -41,7 +42,8 @@ ColorRampEdit::ColorRampEdit() {
 	add_child(popup);
 
 	checker = Ref<ImageTexture>(memnew(ImageTexture));
-	checker->create_from_image(Image(checker_bg_png), ImageTexture::FLAG_REPEAT);
+	Ref<Image> img = memnew(Image(checker_bg_png));
+	checker->create_from_image(img, ImageTexture::FLAG_REPEAT);
 }
 
 int ColorRampEdit::_get_point_from_pos(int x) {
@@ -61,7 +63,7 @@ void ColorRampEdit::_show_color_picker() {
 		return;
 	Size2 ms = Size2(350, picker->get_combined_minimum_size().height + 10);
 	picker->set_pick_color(points[grabbed].color);
-	popup->set_pos(get_global_pos() - Vector2(ms.width - get_size().width, ms.height));
+	popup->set_position(get_global_position() - Vector2(ms.width - get_size().width, ms.height));
 	popup->set_size(ms);
 	popup->popup();
 }

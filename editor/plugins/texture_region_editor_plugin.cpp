@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Author: Mariano Suligoy                                               */
 /*                                                                       */
@@ -677,12 +678,13 @@ void TextureRegionEditor::_edit_region() {
 	}
 
 	autoslice_cache.clear();
-	Image i;
-	if (i.load(texture->get_path()) == OK) {
+	Ref<Image> i;
+	i.instance();
+	if (i->load(texture->get_path()) == OK) {
 		BitMap bm;
 		bm.create_from_image_alpha(i);
-		for (int y = 0; y < i.get_height(); y++) {
-			for (int x = 0; x < i.get_width(); x++) {
+		for (int y = 0; y < i->get_height(); y++) {
+			for (int x = 0; x < i->get_width(); x++) {
 				if (bm.get_bit(Point2(x, y))) {
 					bool found = false;
 					for (List<Rect2>::Element *E = autoslice_cache.front(); E; E = E->next()) {
@@ -710,7 +712,7 @@ void TextureRegionEditor::_edit_region() {
 											autoslice_cache.erase(F->next());
 										} else {
 											queue_erase = true;
-											//Cant delete the first rect in the list.
+											//Can't delete the first rect in the list.
 										}
 										merged = true;
 									}

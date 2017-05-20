@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -35,6 +36,7 @@
 #include "editor/editor_data.h"
 #include "editor/editor_path.h"
 #include "editor/editor_run.h"
+#include "editor/export_template_manager.h"
 #include "editor/filesystem_dock.h"
 #include "editor/groups_editor.h"
 #include "editor/import_dock.h"
@@ -180,7 +182,7 @@ private:
 		SETTINGS_LAYOUT_SAVE,
 		SETTINGS_LAYOUT_DELETE,
 		SETTINGS_LAYOUT_DEFAULT,
-		SETTINGS_LOAD_EXPORT_TEMPLATES,
+		SETTINGS_MANAGE_EXPORT_TEMPLATES,
 		SETTINGS_PICK_MAIN_SCENE,
 		SETTINGS_TOGGLE_FULLSCREN,
 		SETTINGS_HELP,
@@ -203,8 +205,10 @@ private:
 	//Ref<ResourceImportMetadata> scene_import_metadata;
 
 	PanelContainer *scene_root_parent;
+	Control *theme_base;
 	Control *gui_base;
 	VBoxContainer *main_vbox;
+	PanelContainer *play_button_panel;
 
 	//split
 
@@ -240,7 +244,6 @@ private:
 	HBoxContainer *menu_hb;
 	Control *viewport;
 	MenuButton *file_menu;
-	MenuButton *import_menu;
 	MenuButton *tool_menu;
 	ToolButton *export_button;
 	ToolButton *prev_scene;
@@ -300,6 +303,7 @@ private:
 	RunSettingsDialog *run_settings_dialog;
 	ProjectSettings *project_settings;
 	EditorFileDialog *file;
+	ExportTemplateManager *export_template_manager;
 	FileDialog *file_templates;
 	FileDialog *file_export;
 	FileDialog *file_export_lib;
@@ -354,6 +358,9 @@ private:
 	Timer *dock_drag_timer;
 	bool docks_visible;
 	ToolButton *distraction_free;
+
+	bool scene_distraction;
+	bool script_distraction;
 
 	String _tmp_import_path;
 
@@ -435,6 +442,8 @@ private:
 	void _imported(Node *p_node);
 
 	void _node_renamed();
+	void _editor_select_next();
+	void _editor_select_prev();
 	void _editor_select(int p_which);
 	void _set_scene_metadata(const String &p_file, int p_idx = -1);
 	void _get_scene_metadata(const String &p_file);
@@ -443,8 +452,6 @@ private:
 	void _close_messages();
 	void _show_messages();
 	void _vp_resized();
-
-	void _rebuild_import_menu();
 
 	void _save_scene(String p_file, int idx = -1);
 
@@ -598,6 +605,14 @@ private:
 	void _tool_menu_insert_item(const ToolMenuItem &p_item);
 	void _rebuild_tool_menu() const;
 
+	bool _dimming;
+	float _dim_time;
+	Timer *_dim_timer;
+
+	void _start_dimming(bool p_dimming);
+	void _dim_timeout();
+	void _check_gui_base_size();
+
 protected:
 	void _notification(int p_what);
 	static void _bind_methods();
@@ -608,7 +623,8 @@ public:
 	enum EditorTable {
 		EDITOR_2D = 0,
 		EDITOR_3D,
-		EDITOR_SCRIPT
+		EDITOR_SCRIPT,
+		EDITOR_ASSETLIB
 	};
 
 	void set_visible_editor(EditorTable p_table) { _editor_select(p_table); }
@@ -732,6 +748,8 @@ public:
 
 	void update_keying();
 
+	void open_export_template_manager();
+
 	void reload_scene(const String &p_path);
 
 	bool is_exiting() const { return exiting; }
@@ -752,6 +770,8 @@ public:
 	void add_tool_menu_item(const String &p_name, Object *p_handler, const String &p_callback, const Variant &p_ud = Variant());
 	void add_tool_submenu_item(const String &p_name, PopupMenu *p_submenu);
 	void remove_tool_menu_item(const String &p_name);
+
+	void dim_editor(bool p_dimming);
 
 	EditorNode();
 	~EditorNode();

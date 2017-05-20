@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -81,7 +82,7 @@ class TestPhysics2DMainLoop : public MainLoop {
 				}
 			}
 
-			Image image(32, 2, 0, Image::FORMAT_LA8, pixels);
+			Ref<Image> image = memnew(Image(32, 2, 0, Image::FORMAT_LA8, pixels));
 
 			body_shape_data[Physics2DServer::SHAPE_SEGMENT].image = vs->texture_create_from_image(image);
 
@@ -108,7 +109,7 @@ class TestPhysics2DMainLoop : public MainLoop {
 				}
 			}
 
-			Image image(32, 32, 0, Image::FORMAT_LA8, pixels);
+			Ref<Image> image = memnew(Image(32, 32, 0, Image::FORMAT_LA8, pixels));
 
 			body_shape_data[Physics2DServer::SHAPE_CIRCLE].image = vs->texture_create_from_image(image);
 
@@ -135,7 +136,7 @@ class TestPhysics2DMainLoop : public MainLoop {
 				}
 			}
 
-			Image image(32, 32, 0, Image::FORMAT_LA8, pixels);
+			Ref<Image> image = memnew(Image(32, 32, 0, Image::FORMAT_LA8, pixels));
 
 			body_shape_data[Physics2DServer::SHAPE_RECTANGLE].image = vs->texture_create_from_image(image);
 
@@ -163,7 +164,7 @@ class TestPhysics2DMainLoop : public MainLoop {
 				}
 			}
 
-			Image image(32, 64, 0, Image::FORMAT_LA8, pixels);
+			Ref<Image> image = memnew(Image(32, 64, 0, Image::FORMAT_LA8, pixels));
 
 			body_shape_data[Physics2DServer::SHAPE_CAPSULE].image = vs->texture_create_from_image(image);
 
@@ -177,7 +178,7 @@ class TestPhysics2DMainLoop : public MainLoop {
 
 		{
 
-			Image image(convex_png);
+			Ref<Image> image = memnew(Image(convex_png));
 
 			body_shape_data[Physics2DServer::SHAPE_CONVEX_POLYGON].image = vs->texture_create_from_image(image);
 

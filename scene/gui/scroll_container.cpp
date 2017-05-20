@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -84,20 +85,32 @@ void ScrollContainer::_gui_input(const InputEvent &p_gui_input) {
 			const InputEventMouseButton &mb = p_gui_input.mouse_button;
 
 			if (mb.button_index == BUTTON_WHEEL_UP && mb.pressed) {
-				if (h_scroll->is_visible_in_tree() && !v_scroll->is_visible_in_tree()) {
-					// only horizontal is enabled, scroll horizontally
-					h_scroll->set_value(h_scroll->get_value() - h_scroll->get_page() / 8);
+				// only horizontal is enabled, scroll horizontally
+				if (h_scroll->is_visible() && !v_scroll->is_visible()) {
+					h_scroll->set_value(h_scroll->get_value() - h_scroll->get_page() / 8 * mb.factor);
 				} else if (v_scroll->is_visible_in_tree()) {
-					v_scroll->set_value(v_scroll->get_value() - v_scroll->get_page() / 8);
+					v_scroll->set_value(v_scroll->get_value() - v_scroll->get_page() / 8 * mb.factor);
 				}
 			}
 
 			if (mb.button_index == BUTTON_WHEEL_DOWN && mb.pressed) {
-				if (h_scroll->is_visible_in_tree() && !v_scroll->is_visible_in_tree()) {
-					// only horizontal is enabled, scroll horizontally
-					h_scroll->set_value(h_scroll->get_value() + h_scroll->get_page() / 8);
-				} else if (v_scroll->is_visible_in_tree()) {
-					v_scroll->set_value(v_scroll->get_value() + v_scroll->get_page() / 8);
+				// only horizontal is enabled, scroll horizontally
+				if (h_scroll->is_visible() && !v_scroll->is_visible()) {
+					h_scroll->set_value(h_scroll->get_value() + h_scroll->get_page() / 8 * mb.factor);
+				} else if (v_scroll->is_visible()) {
+					v_scroll->set_value(v_scroll->get_value() + v_scroll->get_page() / 8 * mb.factor);
+				}
+			}
+
+			if (mb.button_index == BUTTON_WHEEL_LEFT && mb.pressed) {
+				if (h_scroll->is_visible_in_tree()) {
+					h_scroll->set_value(h_scroll->get_value() - h_scroll->get_page() * mb.factor / 8);
+				}
+			}
+
+			if (mb.button_index == BUTTON_WHEEL_RIGHT && mb.pressed) {
+				if (h_scroll->is_visible_in_tree()) {
+					h_scroll->set_value(h_scroll->get_value() + h_scroll->get_page() * mb.factor / 8);
 				}
 			}
 

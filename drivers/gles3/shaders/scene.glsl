@@ -52,6 +52,10 @@ layout(location=9) in highp vec4 instance_xform1;
 layout(location=10) in highp vec4 instance_xform2;
 layout(location=11) in lowp vec4 instance_color;
 
+#if defined(ENABLE_INSTANCE_CUSTOM)
+layout(location=12) in highp vec4 instance_custom_data;
+#endif
+
 #endif
 
 layout(std140) uniform SceneData { //ubo:0
@@ -146,13 +150,10 @@ out highp float dp_clip;
 
 #endif
 
+#define SKELETON_TEXTURE_WIDTH 256
+
 #ifdef USE_SKELETON
-
-layout(std140) uniform SkeletonData { //ubo:7
-
-	mat3x4 skeleton[MAX_SKELETON_BONES];
-};
-
+uniform highp sampler2D skeleton_texture; //texunit:-6
 #endif
 
 out highp vec4 position_interp;
@@ -160,8 +161,20 @@ out highp vec4 position_interp;
 void main() {
 
 	highp vec4 vertex = vertex_attrib; // vec4(vertex_attrib.xyz * data_attrib.x,1.0);
-	highp mat4 modelview = camera_inverse_matrix * world_transform;
+
+	mat4 world_matrix = world_transform;
+
+
+#ifdef USE_INSTANCING
+
+	{
+		highp mat4 m=mat4(instance_xform0,instance_xform1,instance_xform2,vec4(0.0,0.0,0.0,1.0));
+		world_matrix = world_matrix * transpose(m);
+	}
+#endif
+
 	vec3 normal = normal_attrib * normal_mult;
+
 
 #if defined(ENABLE_TANGENT_INTERP) || defined(ENABLE_NORMALMAP) || defined(LIGHT_USE_ANISOTROPY)
 	vec3 tangent = tangent_attrib.xyz;
@@ -171,17 +184,47 @@ void main() {
 
 #if defined(ENABLE_COLOR_INTERP)
 	color_interp = color_attrib;
+#if defined(USE_INSTANCING)
+	color_interp *= instance_color;
 #endif
 
+#endif
 
 #ifdef USE_SKELETON
-
 	{
 		//skeleton transform
-		highp mat3x4 m=skeleton[bone_indices.x]*bone_weights.x;
-		m+=skeleton[bone_indices.y]*bone_weights.y;
-		m+=skeleton[bone_indices.z]*bone_weights.z;
-		m+=skeleton[bone_indices.w]*bone_weights.w;
+		ivec2 tex_ofs = ivec2( bone_indices.x%256, (bone_indices.x/256)*3 );
+		highp mat3x4 m = mat3x4(
+			texelFetch(skeleton_texture,tex_ofs,0),
+			texelFetch(skeleton_texture,tex_ofs+ivec2(0,1),0),
+			texelFetch(skeleton_texture,tex_ofs+ivec2(0,2),0)
+		) * bone_weights.x;
+
+		tex_ofs = ivec2( bone_indices.y%256, (bone_indices.y/256)*3 );
+
+		m+= mat3x4(
+					texelFetch(skeleton_texture,tex_ofs,0),
+					texelFetch(skeleton_texture,tex_ofs+ivec2(0,1),0),
+					texelFetch(skeleton_texture,tex_ofs+ivec2(0,2),0)
+				) * bone_weights.y;
+
+		tex_ofs = ivec2( bone_indices.z%256, (bone_indices.z/256)*3 );
+
+		m+= mat3x4(
+					texelFetch(skeleton_texture,tex_ofs,0),
+					texelFetch(skeleton_texture,tex_ofs+ivec2(0,1),0),
+					texelFetch(skeleton_texture,tex_ofs+ivec2(0,2),0)
+				) * bone_weights.z;
+
+
+		tex_ofs = ivec2( bone_indices.w%256, (bone_indices.w/256)*3 );
+
+		m+= mat3x4(
+					texelFetch(skeleton_texture,tex_ofs,0),
+					texelFetch(skeleton_texture,tex_ofs+ivec2(0,1),0),
+					texelFetch(skeleton_texture,tex_ofs+ivec2(0,2),0)
+				) * bone_weights.w;
+
 
 		vertex.xyz = vertex * m;
 
@@ -190,42 +233,13 @@ void main() {
 		tangent.xyz = vec4(tangent.xyz,0.0) * mn;
 #endif
 	}
-#endif // USE_SKELETON1
-
-
-#ifdef USE_INSTANCING
-
-	{
-		highp mat3x4 m=mat3x4(instance_xform0,instance_xform1,instance_xform2);
-
-		vertex.xyz = vertex * m;
-		normal = vec4(normal,0.0) * m;
-#if defined(ENABLE_TANGENT_INTERP) || defined(ENABLE_NORMALMAP) || defined(LIGHT_USE_ANISOTROPY)
-		tangent.xyz = vec4(tangent.xyz,0.0) * mn;
 #endif
 
-#if defined(ENABLE_COLOR_INTERP)
-		color_interp*=instance_color;
-#endif
-	}
-#endif //USE_INSTANCING
-
-#if !defined(SKIP_TRANSFORM_USED)
-
-	vertex = modelview * vertex;
-	normal = normalize((modelview * vec4(normal,0.0)).xyz);
-#endif
 
 #if defined(ENABLE_TANGENT_INTERP) || defined(ENABLE_NORMALMAP) || defined(LIGHT_USE_ANISOTROPY)
-# if !defined(SKIP_TRANSFORM_USED)
 
-	tangent=normalize((modelview * vec4(tangent,0.0)).xyz);
-# endif
 	vec3 binormal = normalize( cross(normal,tangent) * binormalf );
 #endif
-
-
-
 
 #if defined(ENABLE_UV_INTERP)
 	uv_interp = uv_attrib;
@@ -235,16 +249,45 @@ void main() {
 	uv2_interp = uv2_attrib;
 #endif
 
+#if defined(USE_INSTANCING) && defined(ENABLE_INSTANCE_CUSTOM)
+	vec4 instance_custom = instance_custom_data;
+#else
+	vec4 instance_custom = vec4(0.0);
+#endif
+
+	highp mat4 modelview = camera_inverse_matrix * world_matrix;
+	highp mat4 local_projection = projection_matrix;
+
+//defines that make writing custom shaders easier
+#define projection_matrix local_projection
+#define world_transform world_matrix
 {
 
 VERTEX_SHADER_CODE
 
 }
 
+
+
+
+#if !defined(SKIP_TRANSFORM_USED)
+
+	vertex = modelview * vertex;
+	normal = normalize((modelview * vec4(normal,0.0)).xyz);
+#endif
+
+
 	vertex_interp = vertex.xyz;
 	normal_interp = normal;
 
 #if defined(ENABLE_TANGENT_INTERP) || defined(ENABLE_NORMALMAP) || defined(LIGHT_USE_ANISOTROPY)
+
+#if !defined(SKIP_TRANSFORM_USED)
+
+	tangent = normalize((modelview * vec4(tangent,0.0)).xyz);
+	binormal = normalize((modelview * vec4(binormal,0.0)).xyz);
+
+#endif
 	tangent_interp = tangent;
 	binormal_interp = binormal;
 #endif
@@ -493,7 +536,7 @@ layout(location=0) out vec4 frag_color;
 #endif
 
 in highp vec4 position_interp;
-uniform highp sampler2D depth_buffer; //texunit:-8
+uniform highp sampler2D depth_buffer; //texunit:-9
 
 float contact_shadow_compute(vec3 pos, vec3 dir, float max_distance) {
 
@@ -926,7 +969,7 @@ void reflection_process(int idx, vec3 vertex, vec3 normal,vec3 binormal, vec3 ta
 
 #ifdef USE_GI_PROBES
 
-uniform mediump sampler3D gi_probe1; //texunit:-6
+uniform mediump sampler3D gi_probe1; //texunit:-11
 uniform highp mat4 gi_probe_xform1;
 uniform highp vec3 gi_probe_bounds1;
 uniform highp vec3 gi_probe_cell_size1;
@@ -934,7 +977,7 @@ uniform highp float gi_probe_multiplier1;
 uniform highp float gi_probe_bias1;
 uniform bool gi_probe_blend_ambient1;
 
-uniform mediump sampler3D gi_probe2; //texunit:-7
+uniform mediump sampler3D gi_probe2; //texunit:-10
 uniform highp mat4 gi_probe_xform2;
 uniform highp vec3 gi_probe_bounds2;
 uniform highp vec3 gi_probe_cell_size2;

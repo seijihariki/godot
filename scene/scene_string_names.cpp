@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -31,6 +32,9 @@
 SceneStringNames *SceneStringNames::singleton = NULL;
 
 SceneStringNames::SceneStringNames() {
+
+	_estimate_cost = StaticCString::create("_estimate_cost");
+	_compute_cost = StaticCString::create("_compute_cost");
 
 	resized = StaticCString::create("resized");
 	dot = StaticCString::create(".");
@@ -145,7 +149,7 @@ SceneStringNames::SceneStringNames() {
 	_update_remote = StaticCString::create("_update_remote");
 	_update_pairs = StaticCString::create("_update_pairs");
 
-	get_minimum_size = StaticCString::create("get_minimum_size");
+	_get_minimum_size = StaticCString::create("_get_minimum_size");
 
 	area_entered = StaticCString::create("area_entered");
 	area_exited = StaticCString::create("area_exited");

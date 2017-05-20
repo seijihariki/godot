@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -216,7 +217,6 @@ void OS_Windows::_touch_event(bool p_pressed, int p_x, int p_y, int idx) {
 
 	InputEvent event;
 	event.type = InputEvent::SCREEN_TOUCH;
-	event.ID = ++last_id;
 	event.screen_touch.index = idx;
 
 	event.screen_touch.pressed = p_pressed;
@@ -233,7 +233,6 @@ void OS_Windows::_drag_event(int p_x, int p_y, int idx) {
 
 	InputEvent event;
 	event.type = InputEvent::SCREEN_DRAG;
-	event.ID = ++last_id;
 	event.screen_drag.index = idx;
 
 	event.screen_drag.x = p_x;
@@ -370,7 +369,6 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 
 			InputEvent event;
 			event.type = InputEvent::MOUSE_MOTION;
-			event.ID = ++last_id;
 			InputEventMouseMotion &mm = event.mouse_motion;
 
 			mm.mod.control = (wParam & MK_CONTROL) != 0;
@@ -404,7 +402,7 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 				SetCursorPos(pos.x, pos.y);
 			}
 
-			input->set_mouse_pos(Point2(mm.x, mm.y));
+			input->set_mouse_position(Point2(mm.x, mm.y));
 			mm.speed_x = input->get_last_mouse_speed().x;
 			mm.speed_y = input->get_last_mouse_speed().y;
 
@@ -451,7 +449,6 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 
 				InputEvent event;
 				event.type = InputEvent::MOUSE_BUTTON;
-				event.ID = ++last_id;
 				InputEventMouseButton &mb = event.mouse_button;
 
 				switch (uMsg) {
@@ -512,10 +509,13 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 						if (!motion)
 							return 0;
 
-						if (motion < 0)
+						if (motion < 0) {
 							mb.button_index = BUTTON_WHEEL_LEFT;
-						else
+							mb.factor = fabs((double)motion / (double)WHEEL_DELTA);
+						} else {
 							mb.button_index = BUTTON_WHEEL_RIGHT;
+							mb.factor = fabs((double)motion / (double)WHEEL_DELTA);
+						}
 					} break;
 					/*
 				case WM_XBUTTONDOWN: {
@@ -582,7 +582,6 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 					if (mb.pressed && mb.button_index > 3) {
 						//send release for mouse wheel
 						mb.pressed = false;
-						event.ID = ++last_id;
 						input->parse_input_event(event);
 					}
 				}
@@ -780,7 +779,6 @@ void OS_Windows::process_key_events() {
 				if ((i == 0 && ke.uMsg == WM_CHAR) || (i > 0 && key_event_buffer[i - 1].uMsg == WM_CHAR)) {
 					InputEvent event;
 					event.type = InputEvent::KEY;
-					event.ID = ++last_id;
 					InputEventKey &k = event.key;
 
 					k.mod = ke.mod_state;
@@ -805,7 +803,6 @@ void OS_Windows::process_key_events() {
 
 				InputEvent event;
 				event.type = InputEvent::KEY;
-				event.ID = ++last_id;
 				InputEventKey &k = event.key;
 
 				k.mod = ke.mod_state;
@@ -1324,7 +1321,7 @@ void OS_Windows::warp_mouse_pos(const Point2 &p_to) {
 	}
 }
 
-Point2 OS_Windows::get_mouse_pos() const {
+Point2 OS_Windows::get_mouse_position() const {
 
 	return Point2(old_x, old_y);
 }
@@ -1589,6 +1586,32 @@ bool OS_Windows::get_borderless_window() {
 	return video_mode.borderless_window;
 }
 
+Error OS_Windows::open_dynamic_library(const String p_path, void *&p_library_handle) {
+	p_library_handle = (void *)LoadLibrary(p_path.utf8().get_data());
+	if (!p_library_handle) {
+		ERR_EXPLAIN("Can't open dynamic library: " + p_path + ". Error: " + String::num(GetLastError()));
+		ERR_FAIL_V(ERR_CANT_OPEN);
+	}
+	return OK;
+}
+
+Error OS_Windows::close_dynamic_library(void *p_library_handle) {
+	if (!FreeLibrary((HMODULE)p_library_handle)) {
+		return FAILED;
+	}
+	return OK;
+}
+
+Error OS_Windows::get_dynamic_library_symbol_handle(void *p_library_handle, const String p_name, void *&p_symbol_handle) {
+	char *error;
+	p_symbol_handle = (void *)GetProcAddress((HMODULE)p_library_handle, p_name.utf8().get_data());
+	if (!p_symbol_handle) {
+		ERR_EXPLAIN("Can't resolve symbol " + p_name + ". Error: " + String::num(GetLastError()));
+		ERR_FAIL_V(ERR_CANT_RESOLVE);
+	}
+	return OK;
+}
+
 void OS_Windows::request_attention() {
 
 	FLASHWINFO info;
@@ -1819,7 +1842,7 @@ void OS_Windows::process_events() {
 
 	MSG msg;
 
-	last_id = joypad->process_joypads(last_id);
+	joypad->process_joypads();
 
 	while (PeekMessageW(&msg, NULL, 0, 0, PM_REMOVE)) {
 
@@ -1970,17 +1993,17 @@ String OS_Windows::get_executable_path() const {
 	wchar_t bufname[4096];
 	GetModuleFileNameW(NULL, bufname, 4096);
 	String s = bufname;
-	print_line("EXEC PATHP??: " + s);
 	return s;
 }
 
-void OS_Windows::set_icon(const Image &p_icon) {
+void OS_Windows::set_icon(const Ref<Image> &p_icon) {
 
-	Image icon = p_icon;
-	if (icon.get_format() != Image::FORMAT_RGBA8)
-		icon.convert(Image::FORMAT_RGBA8);
-	int w = icon.get_width();
-	int h = icon.get_height();
+	ERR_FAIL_COND(!p_icon.is_valid());
+	Ref<Image> icon = p_icon->duplicate();
+	if (icon->get_format() != Image::FORMAT_RGBA8)
+		icon->convert(Image::FORMAT_RGBA8);
+	int w = icon->get_width();
+	int h = icon->get_height();
 
 	/* Create temporary bitmap buffer */
 	int icon_len = 40 + h * w * 4;
@@ -2001,7 +2024,7 @@ void OS_Windows::set_icon(const Image &p_icon) {
 	encode_uint32(0, &icon_bmp[36]);
 
 	uint8_t *wr = &icon_bmp[40];
-	PoolVector<uint8_t>::Read r = icon.get_data().read();
+	PoolVector<uint8_t>::Read r = icon->get_data().read();
 
 	for (int i = 0; i < h; i++) {
 
@@ -2303,7 +2326,6 @@ OS_Windows::OS_Windows(HINSTANCE _hInstance) {
 	hInstance = _hInstance;
 	pressrc = 0;
 	old_invalid = true;
-	last_id = 0;
 	mouse_mode = MOUSE_MODE_VISIBLE;
 #ifdef STDOUT_FILE
 	stdo = fopen("stdout.txt", "wb");

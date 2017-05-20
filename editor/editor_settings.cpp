@@ -6,6 +6,7 @@
 /*                    http:/www.godotengine.org                          */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -406,13 +407,12 @@ void EditorSettings::setup_network() {
 	IP::get_singleton()->get_local_addresses(&local_ip);
 	String lip;
 	String hint;
-	String current = get("network/debug_host");
+	String current = has("network/debug/remote_host") ? get("network/debug/remote_host") : "";
+	int port = has("network/debug/remote_port") ? (int)get("network/debug/remote_port") : 6007;
 
 	for (List<IP_Address>::Element *E = local_ip.front(); E; E = E->next()) {
 
 		String ip = E->get();
-		if (ip == "127.0.0.1")
-			continue;
 
 		if (lip == "")
 			lip = ip;
@@ -423,8 +423,11 @@ void EditorSettings::setup_network() {
 		hint += ip;
 	}
 
-	set("network/debug_host", lip);
-	add_property_hint(PropertyInfo(Variant::STRING, "network/debug_host", PROPERTY_HINT_ENUM, hint));
+	set("network/debug/remote_host", lip);
+	add_property_hint(PropertyInfo(Variant::STRING, "network/debug/remote_host", PROPERTY_HINT_ENUM, hint));
+
+	set("network/debug/remote_port", port);
+	add_property_hint(PropertyInfo(Variant::INT, "network/debug/remote_port", PROPERTY_HINT_RANGE, "1,65535,1"));
 }
 
 void EditorSettings::save() {
@@ -502,6 +505,13 @@ void EditorSettings::_load_defaults(Ref<ConfigFile> p_extra_config) {
 	hints["interface/custom_font"] = PropertyInfo(Variant::STRING, "interface/custom_font", PROPERTY_HINT_GLOBAL_FILE, "*.fnt", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_RESTART_IF_CHANGED);
 	set("interface/custom_theme", "");
 	hints["interface/custom_theme"] = PropertyInfo(Variant::STRING, "interface/custom_theme", PROPERTY_HINT_GLOBAL_FILE, "*.res,*.tres,*.theme", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_RESTART_IF_CHANGED);
+	set("interface/dim_editor_on_dialog_popup", true);
+	set("interface/dim_amount", 0.6f);
+	hints["interface/dim_amount"] = PropertyInfo(Variant::REAL, "interface/dim_amount", PROPERTY_HINT_RANGE, "0,1,0.01", PROPERTY_USAGE_DEFAULT);
+	set("interface/dim_transition_time", 0.08f);
+	hints["interface/dim_transition_time"] = PropertyInfo(Variant::REAL, "interface/dim_transition_time", PROPERTY_HINT_RANGE, "0,1,0.001", PROPERTY_USAGE_DEFAULT);
+
+	set("interface/separate_distraction_mode", false);
 
 	set("filesystem/directories/autoscan_project_path", "");
 	hints["filesystem/directories/autoscan_project_path"] = PropertyInfo(Variant::STRING, "filesystem/directories/autoscan_project_path", PROPERTY_HINT_GLOBAL_DIR);
@@ -523,8 +533,11 @@ void EditorSettings::_load_defaults(Ref<ConfigFile> p_extra_config) {
 	set("text_editor/highlighting/highlight_all_occurrences", true);
 	set("text_editor/cursor/scroll_past_end_of_file", false);
 
-	set("text_editor/indent/tab_size", 4);
-	hints["text_editor/indent/tab_size"] = PropertyInfo(Variant::INT, "text_editor/indent/tab_size", PROPERTY_HINT_RANGE, "1, 64, 1"); // size of 0 crashes.
+	set("text_editor/indent/type", 0);
+	hints["text_editor/indent/type"] = PropertyInfo(Variant::INT, "text_editor/indent/type", PROPERTY_HINT_ENUM, "Tabs,Spaces");
+	set("text_editor/indent/size", 4);
+	hints["text_editor/indent/size"] = PropertyInfo(Variant::INT, "text_editor/indent/size", PROPERTY_HINT_RANGE, "1, 64, 1"); // size of 0 crashes.
+	set("text_editor/indent/convert_indent_on_save", false);
 	set("text_editor/indent/draw_tabs", true);
 
 	set("text_editor/line_numbers/show_line_numbers", true);
@@ -548,6 +561,9 @@ void EditorSettings::_load_defaults(Ref<ConfigFile> p_extra_config) {
 	hints["text_editor/theme/font"] = PropertyInfo(Variant::STRING, "text_editor/theme/font", PROPERTY_HINT_GLOBAL_FILE, "*.fnt");
 	set("text_editor/completion/auto_brace_complete", false);
 	set("text_editor/files/restore_scripts_on_load", true);
+	set("text_editor/completion/complete_file_paths", true);
+	set("text_editor/files/maximum_recent_files", 20);
+	hints["text_editor/files/maximum_recent_files"] = PropertyInfo(Variant::INT, "text_editor/files/maximum_recent_files", PROPERTY_HINT_RANGE, "1, 200, 0");
 
 	//set("docks/scene_tree/display_old_action_buttons",false);
 	set("docks/scene_tree/start_create_dialog_fully_expanded", false);
@@ -575,14 +591,25 @@ void EditorSettings::_load_defaults(Ref<ConfigFile> p_extra_config) {
 	hints["editors/3d/zoom_modifier"] = PropertyInfo(Variant::INT, "editors/3d/zoom_modifier", PROPERTY_HINT_ENUM, "None,Shift,Alt,Meta,Ctrl");
 	set("editors/3d/emulate_numpad", false);
 	set("editors/3d/emulate_3_button_mouse", false);
+	set("editors/3d/warped_mouse_panning", true);
+
+	set("editors/3d/freelook_base_speed", 1);
+	set("editors/3d/freelook_modifier_speed_factor", 5.0);
 
 	set("editors/2d/bone_width", 5);
 	set("editors/2d/bone_color1", Color(1.0, 1.0, 1.0, 0.9));
 	set("editors/2d/bone_color2", Color(0.75, 0.75, 0.75, 0.9));
 	set("editors/2d/bone_selected_color", Color(0.9, 0.45, 0.45, 0.9));
 	set("editors/2d/bone_ik_color", Color(0.9, 0.9, 0.45, 0.9));
-
 	set("editors/2d/keep_margins_when_changing_anchors", false);
+	set("editors/2d/warped_mouse_panning", true);
+
+	set("editors/poly_editor/point_grab_radius", 8);
+
+	set("editors/theme/base_color", Color(0.3, 0.3, 0.3, 1));
+	hints["editors/theme/base_color"] = PropertyInfo(Variant::COLOR, "editors/theme/base_color", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_RESTART_IF_CHANGED);
+	set("editors/theme/contrast", 0.2);
+	hints["editors/theme/contrast"] = PropertyInfo(Variant::REAL, "editors/theme/contrast", PROPERTY_HINT_RANGE, "0.01, 1, 0.01");
 
 	set("run/window_placement/rect", 0);
 	hints["run/window_placement/rect"] = PropertyInfo(Variant::INT, "run/window_placement/rect", PROPERTY_HINT_ENUM, "Default,Centered,Custom Position,Force Maximized,Force Full Screen");

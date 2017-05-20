@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -68,7 +69,7 @@ private:
 
 	int offset;
 	int max_drawn_tab;
-	int hilite_arrow;
+	int highlight_arrow;
 	bool buttons_visible;
 	bool missing_right;
 	Vector<Tab> tabs;

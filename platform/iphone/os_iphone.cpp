@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -196,7 +197,6 @@ void OSIPhone::key(uint32_t p_key, bool p_pressed) {
 
 	InputEvent ev;
 	ev.type = InputEvent::KEY;
-	ev.ID = ++last_event_id;
 	ev.key.echo = false;
 	ev.key.pressed = p_pressed;
 	ev.key.scancode = p_key;
@@ -209,7 +209,6 @@ void OSIPhone::mouse_button(int p_idx, int p_x, int p_y, bool p_pressed, bool p_
 	if (!GLOBAL_DEF("debug/disable_touch", false)) {
 		InputEvent ev;
 		ev.type = InputEvent::SCREEN_TOUCH;
-		ev.ID = ++last_event_id;
 		ev.screen_touch.index = p_idx;
 		ev.screen_touch.pressed = p_pressed;
 		ev.screen_touch.x = p_x;
@@ -225,7 +224,6 @@ void OSIPhone::mouse_button(int p_idx, int p_x, int p_y, bool p_pressed, bool p_
 		ev.type = InputEvent::MOUSE_BUTTON;
 		ev.device = 0;
 		ev.mouse_button.pointer_index = p_idx;
-		ev.ID = ++last_event_id;
 
 		// swaped it for tilted screen
 		//ev.mouse_button.x = ev.mouse_button.global_x = video_mode.height - p_y;
@@ -235,7 +233,7 @@ void OSIPhone::mouse_button(int p_idx, int p_x, int p_y, bool p_pressed, bool p_
 
 		//mouse_list.pressed[p_idx] = p_pressed;
 
-		input->set_mouse_pos(Point2(ev.mouse_motion.x, ev.mouse_motion.y));
+		input->set_mouse_position(Point2(ev.mouse_motion.x, ev.mouse_motion.y));
 		ev.mouse_button.button_index = BUTTON_LEFT;
 		ev.mouse_button.doubleclick = p_doubleclick;
 		ev.mouse_button.pressed = p_pressed;
@@ -250,7 +248,6 @@ void OSIPhone::mouse_move(int p_idx, int p_prev_x, int p_prev_y, int p_x, int p_
 
 		InputEvent ev;
 		ev.type = InputEvent::SCREEN_DRAG;
-		ev.ID = ++last_event_id;
 		ev.screen_drag.index = p_idx;
 		ev.screen_drag.x = p_x;
 		ev.screen_drag.y = p_y;
@@ -264,7 +261,6 @@ void OSIPhone::mouse_move(int p_idx, int p_prev_x, int p_prev_y, int p_x, int p_
 		ev.type = InputEvent::MOUSE_MOTION;
 		ev.device = 0;
 		ev.mouse_motion.pointer_index = p_idx;
-		ev.ID = ++last_event_id;
 
 		if (true) { // vertical
 
@@ -280,7 +276,7 @@ void OSIPhone::mouse_move(int p_idx, int p_prev_x, int p_prev_y, int p_x, int p_
 			ev.mouse_motion.relative_y = ev.mouse_motion.y - p_prev_x;
 		};
 
-		input->set_mouse_pos(Point2(ev.mouse_motion.x, ev.mouse_motion.y));
+		input->set_mouse_position(Point2(ev.mouse_motion.x, ev.mouse_motion.y));
 		ev.mouse_motion.speed_x = input->get_last_mouse_speed().x;
 		ev.mouse_motion.speed_y = input->get_last_mouse_speed().y;
 		ev.mouse_motion.button_mask = 1; // pressed
@@ -325,9 +321,8 @@ void OSIPhone::update_accelerometer(float p_x, float p_y, float p_z) {
 		InputEvent ev;
 		ev.type = InputEvent::JOYPAD_MOTION;
 		ev.device = 0;
-		ev.joy_motion.axis = JOY_ANALOG_0_X;
+		ev.joy_motion.axis = JOY_ANALOG_0;
 		ev.joy_motion.axis_value = (p_x / (float)ACCEL_RANGE);
-		ev.ID = ++last_event_id;
 		last_accel.x = p_x;
 		queue_event(ev);
 	};
@@ -336,9 +331,8 @@ void OSIPhone::update_accelerometer(float p_x, float p_y, float p_z) {
 		InputEvent ev;
 		ev.type = InputEvent::JOYPAD_MOTION;
 		ev.device = 0;
-		ev.joy_motion.axis = JOY_ANALOG_0_Y;
+		ev.joy_motion.axis = JOY_ANALOG_1;
 		ev.joy_motion.axis_value = (p_y / (float)ACCEL_RANGE);
-		ev.ID = ++last_event_id;
 		last_accel.y = p_y;
 		queue_event(ev);
 	};
@@ -347,9 +341,8 @@ void OSIPhone::update_accelerometer(float p_x, float p_y, float p_z) {
 		InputEvent ev;
 		ev.type = InputEvent::JOYPAD_MOTION;
 		ev.device = 0;
-		ev.joy_motion.axis = JOY_ANALOG_1_X;
+		ev.joy_motion.axis = JOY_ANALOG_2;
 		ev.joy_motion.axis_value = ( (1.0 - p_z) / (float)ACCEL_RANGE);
-		ev.ID = ++last_event_id;
 		last_accel.z = p_z;
 		queue_event(ev);
 	};
@@ -362,6 +355,22 @@ void OSIPhone::update_magnetometer(float p_x, float p_y, float p_z) {
 
 void OSIPhone::update_gyroscope(float p_x, float p_y, float p_z) {
 	input->set_gyroscope(Vector3(p_x, p_y, p_z));
+};
+
+int OSIPhone::get_unused_joy_id() {
+	return input->get_unused_joy_id();
+};
+
+void OSIPhone::joy_connection_changed(int p_idx, bool p_connected, String p_name) {
+	input->joy_connection_changed(p_idx, p_connected, p_name);
+};
+
+void OSIPhone::joy_button(int p_device, int p_button, bool p_pressed) {
+	input->joy_button(p_device, p_button, p_pressed);
+};
+
+void OSIPhone::joy_axis(int p_device, int p_axis, const InputDefault::JoyAxis &p_value) {
+	input->joy_axis(p_device, p_axis, p_value);
 };
 
 void OSIPhone::delete_main_loop() {
@@ -400,7 +409,7 @@ bool OSIPhone::is_mouse_grab_enabled() const {
 	return true;
 };
 
-Point2 OSIPhone::get_mouse_pos() const {
+Point2 OSIPhone::get_mouse_position() const {
 
 	return Point2();
 };
@@ -566,7 +575,6 @@ OSIPhone::OSIPhone(int width, int height) {
 	vm.resizable = false;
 	set_video_mode(vm);
 	event_count = 0;
-	last_event_id = 0;
 };
 
 OSIPhone::~OSIPhone() {

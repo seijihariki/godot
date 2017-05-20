@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -177,7 +178,7 @@ void ColorPicker::_update_presets() {
 		}
 	}
 
-	Image i(size.x * presets.size(), size.y, false, Image::FORMAT_RGB8, img);
+	Ref<Image> i = memnew(Image(size.x * presets.size(), size.y, false, Image::FORMAT_RGB8, img));
 
 	Ref<ImageTexture> t;
 	t.instance();
@@ -398,16 +399,16 @@ void ColorPicker::_screen_input(const InputEvent &ev) {
 		Viewport *r = get_tree()->get_root();
 		if (!r->get_visible_rect().has_point(Point2(mev.global_x, mev.global_y)))
 			return;
-		Image img = r->get_screen_capture();
-		if (!img.empty()) {
+		Ref<Image> img = r->get_screen_capture();
+		if (!img.is_null()) {
 			last_capture = img;
 			r->queue_screen_capture();
 		}
-		if (!last_capture.empty()) {
-			int pw = last_capture.get_format() == Image::FORMAT_RGBA8 ? 4 : 3;
-			int ofs = (mev.global_y * last_capture.get_width() + mev.global_x) * pw;
+		if (last_capture.is_valid() && !last_capture->empty()) {
+			int pw = last_capture->get_format() == Image::FORMAT_RGBA8 ? 4 : 3;
+			int ofs = (mev.global_y * last_capture->get_width() + mev.global_x) * pw;
 
-			PoolVector<uint8_t>::Read r = last_capture.get_data().read();
+			PoolVector<uint8_t>::Read r = last_capture->get_data().read();
 
 			Color c(r[ofs + 0] / 255.0, r[ofs + 1] / 255.0, r[ofs + 2] / 255.0);
 
@@ -590,7 +591,7 @@ void ColorPickerButton::_color_changed(const Color &p_color) {
 void ColorPickerButton::pressed() {
 
 	Size2 ms = Size2(300, picker->get_combined_minimum_size().height + 10);
-	popup->set_pos(get_global_pos() - Size2(0, ms.height));
+	popup->set_position(get_global_position() - Size2(0, ms.height));
 	popup->set_size(ms);
 	popup->popup();
 	picker->set_focus_on_line_edit();

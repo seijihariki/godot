@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -408,7 +409,7 @@ Error VariantParser::_parse_enginecfg(Stream *p_stream, Vector<String> &strings,
 	Token token;
 	get_token(p_stream, token, line, r_err_str);
 	if (token.type != TK_PARENTHESIS_OPEN) {
-		r_err_str = "Expected '(' in old-style godot.cfg construct";
+		r_err_str = "Expected '(' in old-style project.godot construct";
 		return ERR_PARSE_ERROR;
 	}
 
@@ -419,7 +420,7 @@ Error VariantParser::_parse_enginecfg(Stream *p_stream, Vector<String> &strings,
 		CharType c = p_stream->get_char();
 
 		if (p_stream->is_eof()) {
-			r_err_str = "Unexpected EOF while parsing old-style godot.cfg construct";
+			r_err_str = "Unexpected EOF while parsing old-style project.godot construct";
 			return ERR_PARSE_ERROR;
 		}
 
@@ -503,39 +504,7 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 		return OK;
 
 	} else if (token.type == TK_IDENTIFIER) {
-		/*
-		VECTOR2,		// 5
-		RECT2,
-		VECTOR3,
-		MATRIX32,
-		PLANE,
-		QUAT,			// 10
-		_AABB, //sorry naming convention fail :( not like it's used often
-		MATRIX3,
-		TRANSFORM,
 
-		// misc types
-		COLOR,
-		IMAGE,			// 15
-		NODE_PATH,
-		_RID,
-		OBJECT,
-		INPUT_EVENT,
-		DICTIONARY,		// 20
-		ARRAY,
-
-		// arrays
-		RAW_ARRAY,
-		INT_ARRAY,
-		REAL_ARRAY,
-		STRING_ARRAY,	// 25
-		VECTOR2_ARRAY,
-		VECTOR3_ARRAY,
-		COLOR_ARRAY,
-
-		VARIANT_MAX
-
-*/
 		String id = token.value;
 		if (id == "true")
 			value = true;
@@ -678,126 +647,6 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 			}
 
 			value = Color(args[0], args[1], args[2], args[3]);
-			return OK;
-
-		} else if (id == "Image") {
-
-			//:|
-
-			get_token(p_stream, token, line, r_err_str);
-			if (token.type != TK_PARENTHESIS_OPEN) {
-				r_err_str = "Expected '('";
-				return ERR_PARSE_ERROR;
-			}
-
-			get_token(p_stream, token, line, r_err_str);
-			if (token.type == TK_PARENTHESIS_CLOSE) {
-				value = Image(); // just an Image()
-				return OK;
-			} else if (token.type != TK_NUMBER) {
-				r_err_str = "Expected number (width)";
-				return ERR_PARSE_ERROR;
-			}
-
-			get_token(p_stream, token, line, r_err_str);
-
-			int width = token.value;
-			if (token.type != TK_COMMA) {
-				r_err_str = "Expected ','";
-				return ERR_PARSE_ERROR;
-			}
-
-			get_token(p_stream, token, line, r_err_str);
-			if (token.type != TK_NUMBER) {
-				r_err_str = "Expected number (height)";
-				return ERR_PARSE_ERROR;
-			}
-
-			int height = token.value;
-
-			get_token(p_stream, token, line, r_err_str);
-			if (token.type != TK_COMMA) {
-				r_err_str = "Expected ','";
-				return ERR_PARSE_ERROR;
-			}
-
-			get_token(p_stream, token, line, r_err_str);
-
-			bool has_mipmaps = false;
-
-			if (token.type == TK_NUMBER) {
-				has_mipmaps = bool(token.value);
-			} else if (token.type == TK_IDENTIFIER && String(token.value) == "true") {
-				has_mipmaps = true;
-			} else if (token.type == TK_IDENTIFIER && String(token.value) == "false") {
-				has_mipmaps = false;
-			} else {
-				r_err_str = "Expected number/true/false (mipmaps)";
-				return ERR_PARSE_ERROR;
-			}
-
-			int mipmaps = token.value;
-
-			get_token(p_stream, token, line, r_err_str);
-			if (token.type != TK_COMMA) {
-				r_err_str = "Expected ','";
-				return ERR_PARSE_ERROR;
-			}
-
-			get_token(p_stream, token, line, r_err_str);
-			if (token.type != TK_IDENTIFIER) {
-				r_err_str = "Expected identifier (format)";
-				return ERR_PARSE_ERROR;
-			}
-
-			String sformat = token.value;
-
-			Image::Format format = Image::FORMAT_MAX;
-
-			for (int i = 0; i < Image::FORMAT_MAX; i++) {
-				if (Image::get_format_name(format) == sformat) {
-					format = Image::Format(i);
-				}
-			}
-
-			if (format == Image::FORMAT_MAX) {
-				r_err_str = "Unknown image format: " + String(sformat);
-				return ERR_PARSE_ERROR;
-			}
-
-			int len = Image::get_image_data_size(width, height, format, mipmaps);
-
-			PoolVector<uint8_t> buffer;
-			buffer.resize(len);
-
-			if (buffer.size() != len) {
-				r_err_str = "Couldn't allocate image buffer of size: " + itos(len);
-			}
-
-			{
-				PoolVector<uint8_t>::Write w = buffer.write();
-
-				for (int i = 0; i < len; i++) {
-					get_token(p_stream, token, line, r_err_str);
-					if (token.type != TK_COMMA) {
-						r_err_str = "Expected ','";
-						return ERR_PARSE_ERROR;
-					}
-
-					get_token(p_stream, token, line, r_err_str);
-					if (token.type != TK_NUMBER) {
-						r_err_str = "Expected number";
-						return ERR_PARSE_ERROR;
-					}
-
-					w[i] = int(token.value);
-				}
-			}
-
-			Image img(width, height, mipmaps, format, buffer);
-
-			value = img;
-
 			return OK;
 
 		} else if (id == "NodePath") {
@@ -1272,7 +1121,7 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 			value = arr;
 
 			return OK;
-		} else if (id == "key") { // compatibility with godot.cfg
+		} else if (id == "key") { // compatibility with project.godot
 
 			Vector<String> params;
 			Error err = _parse_enginecfg(p_stream, params, line, r_err_str);
@@ -1308,7 +1157,7 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 			value = ie;
 			return OK;
 
-		} else if (id == "mbutton") { // compatibility with godot.cfg
+		} else if (id == "mbutton") { // compatibility with project.godot
 
 			Vector<String> params;
 			Error err = _parse_enginecfg(p_stream, params, line, r_err_str);
@@ -1323,7 +1172,7 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 
 			value = ie;
 			return OK;
-		} else if (id == "jbutton") { // compatibility with godot.cfg
+		} else if (id == "jbutton") { // compatibility with project.godot
 
 			Vector<String> params;
 			Error err = _parse_enginecfg(p_stream, params, line, r_err_str);
@@ -1338,7 +1187,7 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 			value = ie;
 
 			return OK;
-		} else if (id == "jaxis") { // compatibility with godot.cfg
+		} else if (id == "jaxis") { // compatibility with project.godot
 
 			Vector<String> params;
 			Error err = _parse_enginecfg(p_stream, params, line, r_err_str);
@@ -1356,67 +1205,11 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 			value = ie;
 
 			return OK;
-		} else if (id == "img") { // compatibility with godot.cfg
-
-			Token token; // FIXME: no need for this declaration? the first argument in line 509 is a Token& token.
-			get_token(p_stream, token, line, r_err_str);
-			if (token.type != TK_PARENTHESIS_OPEN) {
-				r_err_str = "Expected '(' in old-style godot.cfg construct";
-				return ERR_PARSE_ERROR;
-			}
-
-			while (true) {
-				CharType c = p_stream->get_char();
-				if (p_stream->is_eof()) {
-					r_err_str = "Unexpected EOF in old style godot.cfg img()";
-					return ERR_PARSE_ERROR;
-				}
-				if (c == ')')
-					break;
-			}
-
-			value = Image();
-
-			return OK;
 
 		} else {
 			r_err_str = "Unexpected identifier: '" + id + "'.";
 			return ERR_PARSE_ERROR;
 		}
-
-		/*
-				VECTOR2,		// 5
-				RECT2,
-				VECTOR3,
-				MATRIX32,
-				PLANE,
-				QUAT,			// 10
-				_AABB, //sorry naming convention fail :( not like it's used often
-				MATRIX3,
-				TRANSFORM,
-
-				// misc types
-				COLOR,
-				IMAGE,			// 15
-				NODE_PATH,
-				_RID,
-				OBJECT,
-				INPUT_EVENT,
-				DICTIONARY,		// 20
-				ARRAY,
-
-				// arrays
-				RAW_ARRAY,
-				INT_ARRAY,
-				REAL_ARRAY,
-				STRING_ARRAY,	// 25
-				VECTOR2_ARRAY,
-				VECTOR3_ARRAY,
-				COLOR_ARRAY,
-
-				VARIANT_MAX
-
-		*/
 
 		return OK;
 
@@ -1884,39 +1677,6 @@ Error VariantWriter::write(const Variant &p_variant, StoreStringFunc p_store_str
 			Color c = p_variant;
 			p_store_string_func(p_store_string_ud, "Color( " + rtosfix(c.r) + ", " + rtosfix(c.g) + ", " + rtosfix(c.b) + ", " + rtosfix(c.a) + " )");
 
-		} break;
-		case Variant::IMAGE: {
-
-			Image img = p_variant;
-
-			if (img.empty()) {
-				p_store_string_func(p_store_string_ud, "Image()");
-				break;
-			}
-
-			String imgstr = "Image( ";
-			imgstr += itos(img.get_width());
-			imgstr += ", " + itos(img.get_height());
-			imgstr += ", " + String(img.has_mipmaps() ? "true" : "false");
-			imgstr += ", " + Image::get_format_name(img.get_format());
-
-			String s;
-
-			PoolVector<uint8_t> data = img.get_data();
-			int len = data.size();
-			PoolVector<uint8_t>::Read r = data.read();
-			const uint8_t *ptr = r.ptr();
-			for (int i = 0; i < len; i++) {
-
-				if (i > 0)
-					s += ", ";
-				s += itos(ptr[i]);
-			}
-
-			imgstr += ", ";
-			p_store_string_func(p_store_string_ud, imgstr);
-			p_store_string_func(p_store_string_ud, s);
-			p_store_string_func(p_store_string_ud, " )");
 		} break;
 		case Variant::NODE_PATH: {
 

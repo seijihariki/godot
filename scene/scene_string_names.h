@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -48,6 +49,9 @@ class SceneStringNames {
 
 public:
 	_FORCE_INLINE_ static SceneStringNames *get_singleton() { return singleton; }
+
+	StringName _estimate_cost;
+	StringName _compute_cost;
 
 	StringName resized;
 	StringName dot;
@@ -167,7 +171,7 @@ public:
 	StringName area_entered;
 	StringName area_exited;
 
-	StringName get_minimum_size;
+	StringName _get_minimum_size;
 
 	StringName play_play;
 

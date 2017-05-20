@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -189,7 +190,7 @@ Variant GDFunction::call(GDInstance *p_instance, const Variant **p_args, int p_a
 	if (p_state) {
 		//use existing (supplied) state (yielded)
 		stack = (Variant *)p_state->stack.ptr();
-		call_args = (Variant **)stack + sizeof(Variant) * p_state->stack_size;
+		call_args = (Variant **)&p_state->stack.ptr()[sizeof(Variant) * p_state->stack_size]; //ptr() to avoid bounds check
 		line = p_state->line;
 		ip = p_state->ip;
 		alloca_size = p_state->stack.size();
@@ -1432,9 +1433,21 @@ Variant GDFunctionState::_signal_callback(const Variant **p_args, int p_argcount
 	return ret;
 }
 
-bool GDFunctionState::is_valid() const {
+bool GDFunctionState::is_valid(bool p_extended_check) const {
 
-	return function != NULL;
+	if (function == NULL)
+		return false;
+
+	if (p_extended_check) {
+		//class instance gone?
+		if (state.instance_id && !ObjectDB::get_instance(state.instance_id))
+			return false;
+		//script gone?
+		if (state.script_id && !ObjectDB::get_instance(state.script_id))
+			return false;
+	}
+
+	return true;
 }
 
 Variant GDFunctionState::resume(const Variant &p_arg) {
@@ -1463,7 +1476,7 @@ Variant GDFunctionState::resume(const Variant &p_arg) {
 void GDFunctionState::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("resume:Variant", "arg"), &GDFunctionState::resume, DEFVAL(Variant()));
-	ClassDB::bind_method(D_METHOD("is_valid"), &GDFunctionState::is_valid);
+	ClassDB::bind_method(D_METHOD("is_valid", "extended_check"), &GDFunctionState::is_valid, DEFVAL(false));
 	ClassDB::bind_vararg_method(METHOD_FLAGS_DEFAULT, "_signal_callback", &GDFunctionState::_signal_callback, MethodInfo("_signal_callback"));
 }
 

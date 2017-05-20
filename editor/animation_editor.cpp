@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -1034,7 +1035,7 @@ void AnimationKeyEditor::_track_pos_draw() {
 		//draw position
 		int pixel = (timeline_pos - h_scroll->get_value()) * zoom_scale;
 		pixel += name_limit;
-		track_pos->draw_line(ofs + Point2(pixel, 0), ofs + Point2(pixel, size.height), Color(1, 0.3, 0.3, 0.8));
+		track_pos->draw_line(ofs + Point2(pixel, 0), ofs + Point2(pixel, size.height), get_color("highlight_color", "Editor"));
 	}
 }
 
@@ -1088,13 +1089,12 @@ void AnimationKeyEditor::_track_editor_draw() {
 	int sep = get_constant("vseparation", "Tree");
 	int hsep = get_constant("hseparation", "Tree");
 	Color color = get_color("font_color", "Tree");
-	Color sepcolor = get_color("guide_color", "Tree");
-	Color timecolor = get_color("prop_subsection", "Editor");
-	timecolor = Color::html("ff4a414f");
+	Color sepcolor = get_color("light_color_1", "Editor");
+	Color timecolor = get_color("dark_color_2", "Editor");
 	Color hover_color = Color(1, 1, 1, 0.05);
 	Color select_color = Color(1, 1, 1, 0.1);
 	Color invalid_path_color = Color(1, 0.6, 0.4, 0.5);
-	Color track_select_color = Color::html("ffbd8e8e");
+	Color track_select_color = get_color("highlight_color", "Editor");
 
 	Ref<Texture> remove_icon = get_icon("Remove", "EditorIcons");
 	Ref<Texture> move_up_icon = get_icon("MoveUp", "EditorIcons");
@@ -1178,11 +1178,7 @@ void AnimationKeyEditor::_track_editor_draw() {
 
 		int end_px = (l - h_scroll->get_value()) * scale;
 		int begin_px = -h_scroll->get_value() * scale;
-		Color notimecol;
-		notimecol.r = timecolor.gray();
-		notimecol.g = notimecol.r;
-		notimecol.b = notimecol.r;
-		notimecol.a = timecolor.a;
+		Color notimecol = get_color("light_color_1", "Editor");
 
 		{
 
@@ -1482,7 +1478,9 @@ void AnimationKeyEditor::_track_editor_draw() {
 	switch (click.click) {
 		case ClickOver::CLICK_SELECT_KEYS: {
 
-			te->draw_rect(Rect2(click.at, click.to - click.at), Color(0.7, 0.7, 1.0, 0.5));
+			Color box_color = get_color("highlight_color", "Editor");
+			box_color.a = 0.35;
+			te->draw_rect(Rect2(click.at, click.to - click.at), box_color);
 
 		} break;
 		case ClickOver::CLICK_MOVE_KEYS: {
@@ -1723,7 +1721,7 @@ bool AnimationKeyEditor::_edit_if_single_selection() {
 		curve_edit->set_transition(animation->track_get_key_transition(idx, key));
 
 		/*key_edit_dialog->set_size( Size2( 200,200) );
-		key_edit_dialog->set_pos(  track_editor->get_global_pos() + ofs + mpos +Point2(-100,20));
+		key_edit_dialog->set_position(  track_editor->get_global_position() + ofs + mpos +Point2(-100,20));
 		key_edit_dialog->popup();*/
 	}
 
@@ -1870,19 +1868,33 @@ void AnimationKeyEditor::_track_editor_gui_input(const InputEvent &p_input) {
 			if (mb.button_index == BUTTON_WHEEL_UP && mb.pressed) {
 
 				if (mb.mod.command) {
+
 					zoom->set_value(zoom->get_value() + zoom->get_step());
 				} else {
-					v_scroll->set_value(v_scroll->get_value() - v_scroll->get_page() / 8);
+
+					v_scroll->set_value(v_scroll->get_value() - v_scroll->get_page() * mb.factor / 8);
 				}
 			}
 
 			if (mb.button_index == BUTTON_WHEEL_DOWN && mb.pressed) {
 
 				if (mb.mod.command) {
+
 					zoom->set_value(zoom->get_value() - zoom->get_step());
 				} else {
-					v_scroll->set_value(v_scroll->get_value() + v_scroll->get_page() / 8);
+
+					v_scroll->set_value(v_scroll->get_value() + v_scroll->get_page() * mb.factor / 8);
 				}
+			}
+
+			if (mb.button_index == BUTTON_WHEEL_RIGHT && mb.pressed) {
+
+				h_scroll->set_value(h_scroll->get_value() - h_scroll->get_page() * mb.factor / 8);
+			}
+
+			if (mb.button_index == BUTTON_WHEEL_LEFT && mb.pressed) {
+
+				v_scroll->set_value(v_scroll->get_value() + v_scroll->get_page() * mb.factor / 8);
 			}
 
 			if (mb.button_index == BUTTON_RIGHT && mb.pressed) {
@@ -1982,7 +1994,7 @@ void AnimationKeyEditor::_track_editor_gui_input(const InputEvent &p_input) {
 					track_menu->add_item(TTR("Duplicate Transposed"), RIGHT_MENU_DUPLICATE_TRANSPOSE);
 					track_menu->add_item(TTR("Remove Selection"), RIGHT_MENU_REMOVE);
 
-					track_menu->set_pos(te->get_global_pos() + mpos);
+					track_menu->set_position(te->get_global_position() + mpos);
 
 					interp_editing = -1;
 					cont_editing = -1;
@@ -2063,7 +2075,7 @@ void AnimationKeyEditor::_track_editor_gui_input(const InputEvent &p_input) {
 
 						Rect2 area(ofs.x, ofs.y + ((int(mpos.y) / h) + 1) * h, name_limit, h);
 						track_name->set_text(animation->track_get_path(idx));
-						track_name->set_pos(te->get_global_pos() + area.pos);
+						track_name->set_position(te->get_global_position() + area.pos);
 						track_name->set_size(area.size);
 						track_name->show_modal();
 						track_name->grab_focus();
@@ -2213,7 +2225,7 @@ void AnimationKeyEditor::_track_editor_gui_input(const InputEvent &p_input) {
 							int popup_y = ofs.y + ((int(mpos.y) / h) + 2) * h;
 							int popup_x = size.width - track_ofs[1];
 
-							track_menu->set_pos(te->get_global_pos() + Point2(popup_x, popup_y));
+							track_menu->set_position(te->get_global_position() + Point2(popup_x, popup_y));
 
 							wrap_editing = idx;
 							interp_editing = -1;
@@ -2236,7 +2248,7 @@ void AnimationKeyEditor::_track_editor_gui_input(const InputEvent &p_input) {
 							int popup_y = ofs.y + ((int(mpos.y) / h) + 2) * h;
 							int popup_x = size.width - track_ofs[2];
 
-							track_menu->set_pos(te->get_global_pos() + Point2(popup_x, popup_y));
+							track_menu->set_position(te->get_global_position() + Point2(popup_x, popup_y));
 
 							interp_editing = idx;
 							cont_editing = -1;
@@ -2259,7 +2271,7 @@ void AnimationKeyEditor::_track_editor_gui_input(const InputEvent &p_input) {
 							int popup_y = ofs.y + ((int(mpos.y) / h) + 2) * h;
 							int popup_x = size.width - track_ofs[3];
 
-							track_menu->set_pos(te->get_global_pos() + Point2(popup_x, popup_y));
+							track_menu->set_position(te->get_global_position() + Point2(popup_x, popup_y));
 
 							interp_editing = -1;
 							wrap_editing = -1;
@@ -2308,7 +2320,7 @@ void AnimationKeyEditor::_track_editor_gui_input(const InputEvent &p_input) {
 									cvi_track = idx;
 									cvi_pos = pos;
 
-									type_menu->set_pos(get_global_pos() + mpos + ofs);
+									type_menu->set_position(get_global_position() + mpos + ofs);
 									type_menu->popup();
 									return;
 								}
@@ -2503,7 +2515,7 @@ void AnimationKeyEditor::_track_editor_gui_input(const InputEvent &p_input) {
 								float newpos = E->get().pos - from_t + motion;
 								/*
 								if (newpos<0)
-									continue; //no add at the begining
+									continue; //no add at the beginning
 								*/
 								undo_redo->add_do_method(animation.ptr(), "track_insert_key", E->key().track, newpos, animation->track_get_key_value(E->key().track, E->key().key), animation->track_get_key_transition(E->key().track, E->key().key));
 							}
@@ -2890,6 +2902,8 @@ void AnimationKeyEditor::_notification(int p_what) {
 			key_editor->edit(key_edit);
 
 			zoomicon->set_texture(get_icon("Zoom", "EditorIcons"));
+			zoomicon->set_custom_minimum_size(Size2(24 * EDSCALE, 0));
+			zoomicon->set_stretch_mode(TextureRect::STRETCH_KEEP_CENTERED);
 
 			menu_add_track->set_icon(get_icon("AddTrack", "EditorIcons"));
 			menu_add_track->get_popup()->add_icon_item(get_icon("KeyValue", "EditorIcons"), "Add Normal Track", ADD_TRACK_MENU_ADD_VALUE_TRACK);
@@ -3748,7 +3762,7 @@ AnimationKeyEditor::AnimationKeyEditor() {
 	root = NULL;
 	//menu = memnew( MenuButton );
 	//menu->set_flat(true);
-	//menu->set_pos(Point2());
+	//menu->set_position(Point2());
 	//add_child(menu);
 
 	zoomicon = memnew(TextureRect);
@@ -3890,7 +3904,7 @@ AnimationKeyEditor::AnimationKeyEditor() {
 
 	/*	l = memnew( Label );
 	l->set_text("Base: ");
-	l->set_pos(Point2(0,3));
+	l->set_position(Point2(0,3));
 	//dr_panel->add_child(l);*/
 
 	//menu->get_popup()->connect("id_pressed",this,"_menu_callback");
@@ -3927,6 +3941,7 @@ AnimationKeyEditor::AnimationKeyEditor() {
 	v_scroll->set_value(0);
 
 	key_editor_tab = memnew(TabContainer);
+	key_editor_tab->set_tab_align(TabContainer::ALIGN_LEFT);
 	hb->add_child(key_editor_tab);
 	key_editor_tab->set_custom_minimum_size(Size2(200, 0));
 

@@ -6,6 +6,7 @@
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
 /* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -76,6 +77,7 @@ protected:
 
 public:
 	Ref<EditorExportPlatform> get_platform() const;
+
 	bool has(const StringName &p_property) const { return values.has(p_property); }
 
 	Vector<String> get_files_to_export() const;
@@ -152,7 +154,9 @@ private:
 
 protected:
 	virtual void get_preset_features(const Ref<EditorExportPreset> &p_preset, List<String> *r_features) = 0;
+	bool exists_export_template(String template_file_name, String *err) const;
 	String find_export_template(String template_file_name, String *err = NULL) const;
+	void gen_export_flags(Vector<String> &r_flags, int p_flags);
 
 public:
 	struct ExportOption {
@@ -169,6 +173,8 @@ public:
 	virtual Ref<EditorExportPreset> create_preset();
 
 	virtual void get_export_options(List<ExportOption> *r_options) = 0;
+	virtual bool get_option_visibility(const String &p_option, const Map<StringName, Variant> &p_options) const { return true; }
+
 	virtual String get_name() const = 0;
 	virtual Ref<Texture> get_logo() const = 0;
 
@@ -190,7 +196,7 @@ public:
 		DEBUG_FLAG_VIEW_NAVIGATION = 16,
 	};
 
-	virtual Error run(int p_device, int p_debug_flags) { return OK; }
+	virtual Error run(const Ref<EditorExportPreset> &p_preset, int p_device, int p_debug_flags) { return OK; }
 
 	virtual bool can_export(const Ref<EditorExportPreset> &p_preset, String &r_error, bool &r_missing_templates) const = 0;
 
@@ -234,6 +240,8 @@ public:
 
 	void load_config();
 
+	bool poll_export_platforms();
+
 	EditorExport();
 	~EditorExport();
 };
@@ -250,6 +258,8 @@ class EditorExportPlatformPC : public EditorExportPlatform {
 	String release_file_64;
 	String debug_file_32;
 	String debug_file_64;
+
+	bool use64;
 
 public:
 	virtual void get_preset_features(const Ref<EditorExportPreset> &p_preset, List<String> *r_features);
